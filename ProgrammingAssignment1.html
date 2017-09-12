@@ -39,16 +39,11 @@
 			context.fillText("Hello World!",10,500);
 			setTimeout(function(){
 				canvas.width=canvas.width;
-				var gradient=context.createLinearGradient(0,0,200,0);
+				var gradient=context.createLinearGradient(0,0,0,300);
 				gradient.addColorStop(0,"red");
 				gradient.addColorStop(1,"white");
 				context.fillStyle=gradient;
 				context.fillRect(300,10,150,80);
-				var gradientCir = context.createRadialGradient(300,300,5,90,60,100);
-				gradientCir.addColorStop(0,"red");
-				gradientCir.addColorStop(1,"white");
-				context.fillStyle = gradientCir;
-				context.fillRect(300,80,150,80);
 			}, 2000)
 			drawed=true;
 		};
