@@ -5,8 +5,42 @@
 </head>
 <body>
 	<h3>Draw a 2D picture using JavaScript</h3>
-	<canvas id>
-		
+	<button>
+	<canvas id="myCanvas"
+	 width="1000"
+	 height="500">
 	</canvas>
 </body>
 </html>
+<script type="text/javascript">
+	var canvas=document.getElementById('myCanvas');
+	var context=canvas.getContext('2d');
+	context.lineWidth = 5;
+	context.fillStyle="blue";
+	context.strokeStyle = "red";
+	context.beginPath();
+	context.moveTo(50,50);
+	context.lineTo(100,100);
+	context.stroke();
+	context.closePath();
+	context.beginPath();
+	context.arc(500,300,60,0,2*Math.PI);
+	context.fill();
+	context.font="30px Arial";
+	context.fillText("Hello World!",10,500);
+
+	setTimeout(function(){
+		context.width=context.width;
+		var gradient=context.createLinearGradient(0,0,200,0);
+		gradient.addColorStop(0,"red");
+		gradient.addColorStop(1,"white");
+		context.fillStyle=gradient;
+		context.fillRect(300,10,150,80);
+		var gradientCir = context.createRadialGradient(300,300,5,90,60,100);
+		gradientCir.addColorStop(0,"red");
+		gradientCir.addColorStop(1,"white");
+		context.fillStyle = gradientCir;
+		context.fillRect(300,80,150,80);
+	}, 3000)
+
+</script>
