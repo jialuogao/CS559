@@ -4,13 +4,14 @@
 	<title>Programming Assignment 1</title>
 </head>
 <body>
-	<h2 style="color:#66CCFF">Draw a 2D picture using JavaScript</h2>
-	<button id="trigger"> Click to Show a 2D Picture </button>
-	<button id="cleaner"> Click to Clean the Drawing </button>
+	<h2 style="color:#66CCFF">TOP view of the CS building and UWM logo by using only Javascript</h2>
+	<button id="trigger" stype="fontsize:30px"> Click to Show a 2D Picture </button>
+
+	<button id="cleaner" stype="fontsize:30px"> Click to Clean the Drawing </button>
 	</br>
 	<canvas id="myCanvas"
 	 width="1000"
-	 height="500">
+	 height="700">
 	</canvas>
 </body>
 </html>
@@ -48,6 +49,8 @@
 			var fontsize=40*scale;
 			context.font=fontsize+"px Arial";
 			context.fillText("CS Building",140*scale,270*scale);
+			context.fillStyle="Black";
+			context.fillText("Top View",180*scale,70*scale);
 
 			var centerX=170*scale;
       var centerY=180*scale;
