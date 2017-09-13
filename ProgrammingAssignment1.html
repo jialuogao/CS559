@@ -24,7 +24,8 @@
 		canvas.width=canvas.width;
 		drawed=false;
 	}
-	document.getElementById('trigger').onclick=function(){
+	document.getElementById('trigger').onclick=draw;
+	function draw(){
 		if(!drawed){
 			context.lineWidth = 1;
 			context.fillStyle="blue";
@@ -138,4 +139,5 @@
 		};
 		drawed=true;
 	};
+	window.onload=draw();
 </script>
