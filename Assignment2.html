@@ -52,26 +52,33 @@ Box.prototype.draw = function(){
   var color = "black";
   context.strokeStyle=color;
 
+
+  var a =(this.size/2)*Math.cos(this.angle);
+  var b =(this.size/2)*Math.sin(this.angle);
     context.beginPath();
     context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
-    context.lineTo(-(this.size/2)*Math.sin(this.angle),0);
+    context.lineTo(-b,0);
     context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
-    context.lineTo((this.size/2)*Math.sin(this.angle),0);
+    context.lineTo(b,0);
     context.lineTo(0,(-this.size/2)*Math.cos(this.rotaX))
     context.stroke();
     context.fill();
     context.beginPath();
     context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
-    context.lineTo(-(this.size/2)*Math.cos(this.angle),0);
+    if(x==0){
+      contex.lineTo(-a,(this.size/2)*Math.cos(this.rotaX));
+    }
+    context.lineTo(-a,0);
+
     context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
-    context.lineTo((this.size/2)*Math.cos(this.angle),0);
+    context.lineTo(a,0);
     context.lineTo(0,-(this.size/2)*Math.cos(this.rotaX))
     context.stroke();
     context.fill();
     if(this.angle<=Math.PI/2 || this.angle>=Math.PI*3/2){
       context.beginPath();
       context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
-      context.lineTo(-(this.size/2)*Math.sin(this.angle),0);
+      context.lineTo(-b,this.size/2*Math.sin(this.rotaX));
       context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
       context.stroke();
       context.fill();
@@ -80,11 +87,35 @@ Box.prototype.draw = function(){
     {
       context.beginPath();
       context.moveTo(0,(this.size/2)*Math.cos(this.rotaX));
-      context.lineTo((this.size/2)*Math.sin(this.angle),0);
+      context.lineTo(b,this.size/2*Math.sin(this.rotaX));
       context.lineTo(0,-(this.size/2)*Math.cos(this.rotaX));
       context.stroke();
       context.fill();
     }
+
+    function calcy(x,size,rotaX){
+      var a2 = size/2;
+      var b2 = size/2*Math.sin(rotaX);
+      y = Math.sqrt((b2*b2*(a2*a2-x*x))/a2/a2);
+      return y;
+    }
+
+    context.beginPath();
+    context.moveTo(a,calcy(a,this.size,this.rotaX));
+    context.lineTo(b,calcy(b,this.size,this.rotaX));
+    context.lineTo(-a,calcy(-a,this.size,this.rotaX));
+    context.lineTo(-b,calcy(-b,this.size,this.rotaX));
+    context.lineTo(a,calcy(a,this.size,this.rotaX));
+    context.stroke();
+    context.fill();
+    // context.beginPath();
+    // context.moveTo(0,-(this.size/2)*Math.sin(this.rotaX));
+    // context.lineTo(-b,0);
+    // context.lineTo(0,(this.size/2)*Math.sin(this.rotaX));
+    // context.lineTo(b,0);
+    // context.lineTo(0,-(this.size/2)*Math.sin(this.rotaX))
+    // context.stroke();
+    // context.fill();
 
 };
 Box.prototype.update = function(){
