@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <h2>X:yellow Y:green Z:blue</h2>
-
-    <br/>
     <canvas id="myCanvas" height="600" width="600">
     </canvas>
 
     <br/>
     scale: <input id="scaleSlider" type="range" min="0.2" max="1.4" step="0.01"/>
-    speed: <input id="speedSlider" type="range" min="0" max="4" step="0.01"/>
-    rotation yz: <input id="xSlider" type="range" min="-180" max="180" step="4"/>
-    rotation xy: <input id="zSlider" type="range" min="0" max="360" step="4"/>
+    Y rotation speed: <input id="speedSlider" type="range" min="0" max="4" step="0.01"/>
+    X rotation: <input id="xSlider" type="range" min="-180" max="180" step="4"/>
+    Z rotation: <input id="zSlider" type="range" min="0" max="360" step="4"/>
   </body>
   <head>
     <title>Programming Assignment 2</title>
@@ -38,9 +35,8 @@ function drawLine(x1,y1,x2,y2,color,width){
   context.lineTo(x2,y2);
   context.stroke();
 };
-function Box(speed,color){
+function Box(speed){
   this.size = 400;
-  this.color = color || "blue";
   this.angle = 0;
   this.speed = speed || 1;
   this.scale = 1;
@@ -48,150 +44,54 @@ function Box(speed,color){
   this.rotaX = 0;
 };
 Box.prototype.draw = function(){
-  context.fillStyle=this.color;
   var color = "black";
   context.strokeStyle=color;
 
 
   var a =(this.size/2)*Math.cos(this.angle);
   var b =(this.size/2)*Math.sin(this.angle);
-    context.beginPath();
-    context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
-    context.lineTo(-b,0);
-    context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
-    context.lineTo(b,0);
-    context.lineTo(0,(-this.size/2)*Math.cos(this.rotaX))
-    context.stroke();
-    context.fill();
-    context.beginPath();
-    context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
-    if(x==0){
-      contex.lineTo(-a,(this.size/2)*Math.cos(this.rotaX));
-    }
-    context.lineTo(-a,0);
 
-    context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
-    context.lineTo(a,0);
-    context.lineTo(0,-(this.size/2)*Math.cos(this.rotaX))
-    context.stroke();
-    context.fill();
-    if(this.angle<=Math.PI/2 || this.angle>=Math.PI*3/2){
-      context.beginPath();
-      context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
-      context.lineTo(-b,this.size/2*Math.sin(this.rotaX));
-      context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
-      context.stroke();
-      context.fill();
-    }
-    else if(this.angle<=Math.PI*3/2)
-    {
-      context.beginPath();
-      context.moveTo(0,(this.size/2)*Math.cos(this.rotaX));
-      context.lineTo(b,this.size/2*Math.sin(this.rotaX));
-      context.lineTo(0,-(this.size/2)*Math.cos(this.rotaX));
-      context.stroke();
-      context.fill();
-    }
 
-    function calcy(x,size,rotaX){
-      var a2 = size/2;
-      var b2 = size/2*Math.sin(rotaX);
-      y = Math.sqrt((b2*b2*(a2*a2-x*x))/a2/a2);
-      return y;
-    }
+  context.beginPath();
+  context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
+  context.lineTo(-b,(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
+  context.lineTo(b,-(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.lineTo(0,(-this.size/2)*Math.cos(this.rotaX))
+  context.stroke();
 
-    context.beginPath();
-    context.moveTo(a,calcy(a,this.size,this.rotaX));
-    context.lineTo(b,calcy(b,this.size,this.rotaX));
-    context.lineTo(-a,calcy(-a,this.size,this.rotaX));
-    context.lineTo(-b,calcy(-b,this.size,this.rotaX));
-    context.lineTo(a,calcy(a,this.size,this.rotaX));
-    context.stroke();
-    context.fill();
-    // context.beginPath();
-    // context.moveTo(0,-(this.size/2)*Math.sin(this.rotaX));
-    // context.lineTo(-b,0);
-    // context.lineTo(0,(this.size/2)*Math.sin(this.rotaX));
-    // context.lineTo(b,0);
-    // context.lineTo(0,-(this.size/2)*Math.sin(this.rotaX))
-    // context.stroke();
-    // context.fill();
+
+  context.beginPath();
+  context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
+  context.lineTo(-a,-(this.size/2)*Math.sin(this.rotaX)*Math.sin(this.angle));
+  context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
+  context.lineTo(a,(this.size/2)*Math.sin(this.rotaX)*Math.sin(this.angle));
+  context.lineTo(0,-(this.size/2)*Math.cos(this.rotaX))
+  context.stroke();
+
+
+  context.beginPath();
+  context.moveTo(-b,(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.lineTo(-a,-(this.size/2)*Math.sin(this.rotaX)*Math.sin(this.angle));
+  context.lineTo(b,-(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.lineTo(a,(this.size/2)*Math.sin(this.rotaX)*Math.sin(this.angle));
+  context.lineTo(-b,(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.stroke();
+
 
 };
 Box.prototype.update = function(){
   this.angle = (this.angle + Math.PI * 0.005 * this.speed) % (2*Math.PI);
 }
 window.onload = function start(){
-  var box=new Box(speedSlider.value,"red");
+  var box=new Box(speedSlider.value);
   function draw(){
     canvas.width=canvas.width;
     context.translate(300,300);
     context.rotate(box.rotaZ);
     context.scale(box.scale,box.scale);
     context.save();
-    drawLine(0,400,0,-400,"green","3"); //draw the rotation axis
-
-    if(box.angle<=Math.PI/2){
-      drawLine(0,0,-400*Math.cos(box.angle),0,"yellow","3");
-      drawLine(0,0,-400*Math.sin(box.angle),0,"blue","3");
-      drawLine(400*Math.sin(box.angle),0,0,0,"blue","3");
-      drawLine(400*Math.cos(box.angle),0,0,0,"yellow","3");
-    }
-    else if(box.angle<=Math.PI){
-      drawLine(0,0,-400*Math.sin(box.angle),0,"blue","3");
-      drawLine(400*Math.cos(box.angle),0,0,0,"yellow","3");
-      drawLine(0,0,-400*Math.cos(box.angle),0,"yellow","3");
-      drawLine(400*Math.sin(box.angle),0,0,0,"blue","3");
-    }
-    else if(box.angle<=Math.PI*3/2){
-      drawLine(0,0,400*Math.cos(box.angle),0,"yellow","3");
-      drawLine(-400*Math.sin(box.angle),0,0,0,"blue","3");
-      drawLine(0,0,400*Math.sin(box.angle),0,"blue","3");
-      drawLine(-400*Math.cos(box.angle),0,0,0,"yellow","3");
-    }
-    else{
-      drawLine(0,0,400*Math.sin(box.angle),0,"blue","3");
-      drawLine(400*Math.cos(box.angle),0,0,0,"yellow","3");
-      drawLine(0,0,-400*Math.cos(box.angle),0,"yellow","3");
-      drawLine(-400*Math.sin(box.angle),0,0,0,"blue","3");
-    }
-    drawLine((box.size-1)/2*Math.cos(box.angle),0,box.size/2*Math.sin(box.rotaX),0,"black");
-    drawLine(-(box.size-1)/2*Math.cos(box.angle),0,box.size/2*Math.sin(box.rotaX),0,"black");
-
-    context.fillStyle="red";
-    context.rotate(Math.PI/2);
-    context.beginPath();
-    context.moveTo(0,-(box.size/2));
-    context.lineTo(-(box.size/2)*Math.sin(box.rotaX),0);
-    context.lineTo(0,(box.size/2));
-    context.lineTo((box.size/2)*Math.sin(box.rotaX),0);
-    context.lineTo(0,(-box.size/2));
-    context.stroke();
-    context.fill();
-
-    context.restore();
     box.draw();
-
-    context.rotate(Math.PI/2);
-    context.fillStyle="red";
-    if(box.angle<=Math.PI/2 || box.angle>=Math.PI*3/2){
-      context.beginPath();
-      context.moveTo(0,-(box.size/2));
-      context.lineTo(-(box.size/2)*Math.sin(box.rotaX),0);
-      context.lineTo(0,(box.size/2));
-      context.stroke();
-      context.fill();
-    }
-    else if(box.angle<=Math.PI*3/2)
-    {
-      context.beginPath();
-      context.moveTo(0,(box.size/2));
-      context.lineTo((box.size/2)*Math.sin(box.rotaX),0);
-      context.lineTo(0,-(box.size/2));
-      context.stroke();
-      context.fill();
-    }
-    context.restore();
     box.update();
     context.restore();
     window.requestAnimationFrame(draw);
