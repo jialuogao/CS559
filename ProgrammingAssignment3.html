@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PA3</title>
+    <script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
+  </head>
+  <body>
+    <canvas id="canvas" height="600" width="1000">
+    </canvas>
+    <input id="slider1" type="range" min="0" max="100" />
+    <input id="slider2" type="range" min="0" max="100" />
+    <input id="slider3" type="range" min="0" max="100" />
+  </body>
+</html>
+
+<script type="text/javascript">
+  var canvas=document.getElementById('canvas');
+  var context=canvas.getContext('2d');
+  var m4=twgl.m4;
+
+  var slider1 = document.getElementById('slider1');
+  slider1.value = 0;
+  var slider2 = document.getElementById('slider2');
+  slider2.value = 0;
+  var slider3 = document.getElementById('slider3');
+  slider3.value = 0;
+
+  var Tviewport = m4.translation([500,-300,0]);
+
+  function moveToTx(x,y,z,Tx){
+    var location = [x,y,z];
+    var locationTx = m4.transformPoint(Tx,location);
+    context.moveTo(locationTx[0],-locationTx[1]);
+  }
+  function lineToTx(x,y,z,Tx){
+    var location = [x,y,z];
+    var locationTx = m4.transformPoint(Tx,location);
+    context.lineTo(locationTx[0],-locationTx[1]);
+  }
+  function drawAxes(Tx){
+    moveToTx(0,0,0,Tx);
+    lineToTx(100,0,0,Tx);
+    context.stroke();
+    moveToTx(0,0,0,Tx);
+    lineToTx(0,100,0,Tx);
+    context.stroke();
+    moveToTx(0,0,0,Tx);
+    lineToTx(0,0,100,Tx);
+    context.stroke();
+  }
+  function draw(Tx) {
+    canvas.width = canvas.width;
+
+    var angle1 = slider1.value*0.02*Math.PI;
+    var angle2 = slider2.value*0.02*Math.PI;
+    var angle3 = slider3.value*0.02*Math.PI;
+
+
+    var eye = [500*Math.cos(angle3),
+                500*Math.sin(angle3),
+                500*Math.cos(angle1)];
+    var target = [0,0,0];
+    //var up = [Math.cos(angle2)*Math.sin(angle3),
+    //          Math.sin(angle1)*Math.cos(angle3),
+    //          Math.cos(angle1)*Math.sin(angle2)];
+    var up = [0,0,1*Math.cos(angle1)];
+    var Tcamera = m4.multiply(m4.inverse(m4.lookAt(eye,target,up)),Tx);
+    drawAxes(Tcamera);
+
+  }
+  function setup() {
+    draw(Tviewport);
+  }
+  slider1.addEventListener("input",setup);
+  slider2.addEventListener("input",setup);
+  slider3.addEventListener("input",setup);
+  window.onload = setup;
+</script>
