@@ -54,11 +54,11 @@
   }
 
   function drawShape(r1,r2,ag,Tx){
-    moveToTx(r1+Math.sin(ag/2)*2*r2,0,-r2*Math.sin(ag),Tx);
+    moveToTx(r1+Math.cos(ag)*r2,0,r2*Math.sin(ag),Tx);
     for(j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
-      lineToTx((r1+Math.sin(ag/2)*2*r2)*Math.cos(j),
-               (r1+Math.sin(ag/2)*2*r2)*Math.sin(j),
-               -r2*Math.sin(ag),Tx);
+      lineToTx((r1+Math.cos(ag)*r2)*Math.cos(j),
+               (r1+Math.cos(ag)*r2)*Math.sin(j),
+               r2*Math.sin(ag),Tx);
     }
     context.stroke();
   }
