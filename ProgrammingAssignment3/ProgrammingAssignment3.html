@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PA3</title>
+    <script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
+  </head>
+  <body>
+    <canvas id="canvas" height="600" width="1000">
+    </canvas>
+    <input id="slider1" type="range" min="0" max="100" />
+    <input id="slider2" type="range" min="0" max="100" />
+    <input id="slider3" class="vertical-range" type="range" min="-100" max="100"/>
+  </body>
+</html>
+<style>
+  /*Got the following style code from https://codepen.io/ATC-test/pen/myPNqW*/
+  .vertical-range {
+    -webkit-appearance: slider-vertical;
+  }
+</style>
+<script type="text/javascript">
+  var canvas=document.getElementById('canvas');
+  var context=canvas.getContext('2d');
+  var m4=twgl.m4;
+
+  var slider1 = document.getElementById('slider1');
+  slider1.value = 0;
+  var slider2 = document.getElementById('slider2');
+  slider2.value = 0;
+  var slider3 = document.getElementById('slider3');
+  slider3.value = 0;
+
+
+  function moveToTx(x,y,z,Tx){
+    var location = [x,y,z];
+    var locationTx = m4.transformPoint(Tx,location);
+    context.moveTo(locationTx[0],-locationTx[1]);
+  }
+  function lineToTx(x,y,z,Tx){
+    var location = [x,y,z];
+    var locationTx = m4.transformPoint(Tx,location);
+    context.lineTo(locationTx[0],-locationTx[1]);
+  }
+  function drawAxes(Tx){
+    moveToTx(0,0,0,Tx);
+    lineToTx(100,0,0,Tx);
+    context.stroke();
+    moveToTx(0,0,0,Tx);
+    lineToTx(0,100,0,Tx);
+    context.stroke();
+    moveToTx(0,0,0,Tx);
+    lineToTx(0,0,100,Tx);
+    context.stroke();
+  }
+
+  function drawShape(r1,r2,ag,Tx){
+    moveToTx(r1+Math.sin(ag/2)*2*r2,0,-r2*Math.sin(ag),Tx);
+    for(j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
+      lineToTx((r1+Math.sin(ag/2)*2*r2)*Math.cos(j),
+               (r1+Math.sin(ag/2)*2*r2)*Math.sin(j),
+               -r2*Math.sin(ag),Tx);
+    }
+    context.stroke();
+  }
+
+  var axis1 = [1,0,0];
+  var axis2 = [0,1,0];
+  var axis3 = [0,0,1];
+  var ag = 0;
+  function draw() {
+    canvas.width = canvas.width;
+    var angle1 = slider1.value*0.02*Math.PI;
+    var angle2 = slider2.value*0.02*Math.PI;
+    var level = (slider3.value-100)*0.005*Math.PI;
+
+    var stack = [m4.identity()];
+
+    var eye = [800,800,800*Math.cos(level)];
+    var target = [0,0,0];
+    var up = [0,0,1];
+
+//    var Tmodel = m4.multiply(m4.axisRotation(axis2,angle2),m4.axisRotation(axis1,angle1));
+    var Tcamera = m4.inverse(m4.lookAt(eye,target,up));
+    var Tprojection=m4.perspective(Math.PI/8,1,3,400);
+    //var Tprojection=m4.ortho(-250,250,-200,300,-2,2);
+    var Tviewport = m4.multiply(m4.scaling([200,200,200]),m4.translation([500,-300,0]));
+    var Tcpv = m4.multiply(m4.multiply(Tcamera,Tprojection),Tviewport);
+//    var Tmcpv = m4.multiply(Tmodel,Tcpv);
+
+    drawAxes(Tcpv);
+    drawShape(250,100,ag,Tcpv);
+    update();
+    window.requestAnimationFrame(draw);
+//    drawShape(Tmcpv);
+  }
+  function update(){
+    ag = (ag + Math.PI/320) % (Math.PI*2);
+  }
+  slider1.addEventListener("input",draw);
+  slider2.addEventListener("input",draw);
+  slider3.addEventListener("input",update);
+  window.onload = draw;
+</script>
