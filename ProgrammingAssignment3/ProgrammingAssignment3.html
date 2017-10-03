@@ -9,7 +9,8 @@
     </canvas>
     <input id="slider1" type="range" min="0" max="100" />
     <input id="slider2" type="range" min="0" max="100" />
-    <input id="slider3" class="vertical-range" type="range" min="-100" max="100"/>
+    <input id="slider3" class="vertical-range" type="range" min="-100" max="200"/>
+    <button id="button" onclick="toggle();">click</button>
   </body>
 </html>
 <style>
@@ -54,10 +55,10 @@
   }
 
   function drawShape(r1,r2,ag,Tx){
-    moveToTx(r1+Math.cos(ag)*r2,0,r2*Math.sin(ag),Tx);
+    moveToTx(r1-Math.cos(ag)*r2,0,r2*Math.sin(ag),Tx);
     for(j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
-      lineToTx((r1+Math.cos(ag)*r2)*Math.cos(j),
-               (r1+Math.cos(ag)*r2)*Math.sin(j),
+      lineToTx((r1-Math.cos(ag)*r2)*Math.cos(j),
+               (r1-Math.cos(ag)*r2)*Math.sin(j),
                r2*Math.sin(ag),Tx);
     }
     context.stroke();
@@ -68,7 +69,8 @@
   var axis3 = [0,0,1];
   var ag = 0;
   function draw() {
-    canvas.width = canvas.width;
+    if(check)
+      canvas.width = canvas.width;
     var angle1 = slider1.value*0.02*Math.PI;
     var angle2 = slider2.value*0.02*Math.PI;
     var level = (slider3.value-100)*0.005*Math.PI;
@@ -88,7 +90,7 @@
 //    var Tmcpv = m4.multiply(Tmodel,Tcpv);
 
     drawAxes(Tcpv);
-    drawShape(250,100,ag,Tcpv);
+    drawShape(200,100,ag,Tcpv);
     update();
     window.requestAnimationFrame(draw);
 //    drawShape(Tmcpv);
@@ -96,8 +98,17 @@
   function update(){
     ag = (ag + Math.PI/320) % (Math.PI*2);
   }
+
   slider1.addEventListener("input",draw);
   slider2.addEventListener("input",draw);
   slider3.addEventListener("input",update);
   window.onload = draw;
+
+
+
+  function toggle(){
+    check=!check;
+  }
+  var check=false;
+
 </script>
