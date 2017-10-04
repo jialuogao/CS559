@@ -57,7 +57,7 @@
 
   function drawSkeleton1(r1,r2,ag,Tx){
     moveToTx(r1-Math.cos(ag)*r2,0,r2*Math.sin(ag),Tx);
-    for(j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
+    for(var j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
       lineToTx((r1-Math.cos(ag)*r2)*Math.cos(j),
                (r1-Math.cos(ag)*r2)*Math.sin(j),
                r2*Math.sin(ag),Tx);
@@ -66,7 +66,7 @@
   }
   function drawSkeleton2(r1,r2,Tx){
     moveToTx((r1-r2),0,0,Tx);
-    for(j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
+    for(var j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
       lineToTx(r1-r2*Math.cos(j),0,
                r2*Math.sin(j),Tx);
     }
@@ -75,7 +75,7 @@
   function drawShape(r1,r2,ag,Tx,n,turnVert,turnHori){
     ag =- ag;
     var angleD = Math.PI*2/n;
-    for(i = 0 ; i <= n ; i ++){
+    for(var i = 0 ; i <= n ; i ++){
       var ag1, ag2;
       if(turnVert){
         ag1 = ag;
@@ -110,7 +110,8 @@
   var axis2 = [0,1,0];
   var axis3 = [0,0,1];
   var ag = 0;
-  function drawSingleElement() {
+  function draw() {
+    canvas.width=canvas.width;
     var n = document.getElementById("slider4").value;
     var angle1 = slider1.value*0.02*Math.PI;
     var level = (slider3.value-100)*0.005*Math.PI;
@@ -119,6 +120,7 @@
     var HideAxis = bool3.checked;
 
     var stack = [m4.identity()];
+    stack.unshift(stack[0]);
 
     var eye = [800,800,800*Math.cos(level)];
     var target = [0,0,0];
