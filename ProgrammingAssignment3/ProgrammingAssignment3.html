@@ -55,7 +55,7 @@
     context.lineTo(locationTx[0],-locationTx[1]);
   }
 
-  function drawCircle(r1,r2,ag,Tx){
+  function drawSkeleton1(r1,r2,ag,Tx){
     moveToTx(r1-Math.cos(ag)*r2,0,r2*Math.sin(ag),Tx);
     for(j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
       lineToTx((r1-Math.cos(ag)*r2)*Math.cos(j),
@@ -64,7 +64,7 @@
     }
     context.stroke();
   }
-  function drawSkeleton(r1,r2,Tx){
+  function drawSkeleton2(r1,r2,Tx){
     moveToTx((r1-r2),0,0,Tx);
     for(j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
       lineToTx(r1-r2*Math.cos(j),0,
@@ -89,9 +89,9 @@
       else{
         ag2 = 0;
       }
-      drawCircle(r1,r2,(ag1+i*angleD),Tx);
+      drawSkeleton1(r1,r2,(ag1+i*angleD),Tx);
       var TempTx = m4.multiply(m4.axisRotation(axis3,ag2+i*angleD),Tx);
-      drawSkeleton(r1,r2,TempTx);
+      drawSkeleton2(r1,r2,TempTx);
     }
   }
   function drawAxes(Tx){
@@ -110,8 +110,7 @@
   var axis2 = [0,1,0];
   var axis3 = [0,0,1];
   var ag = 0;
-  function draw() {
-    canvas.width = canvas.width;
+  function drawSingleElement() {
     var n = document.getElementById("slider4").value;
     var angle1 = slider1.value*0.02*Math.PI;
     var level = (slider3.value-100)*0.005*Math.PI;
