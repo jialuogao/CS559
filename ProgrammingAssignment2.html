@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <canvas id="myCanvas" height="600" width="600">
+    </canvas>
+
+    <br/>
+    scale: <input id="scaleSlider" type="range" min="0.2" max="1.4" step="0.01"/>
+    Y rotation speed: <input id="speedSlider" type="range" min="0" max="4" step="0.01"/>
+    X rotation: <input id="xSlider" type="range" min="-180" max="180" step="4"/>
+    Z rotation: <input id="zSlider" type="range" min="0" max="360" step="4"/>
+  </body>
+  <head>
+    <title>Programming Assignment 2</title>
+  </head>
+</html>
+
+<script>
+var canvas=document.getElementById('myCanvas');
+var context=canvas.getContext('2d');
+var scaleSlider = document.getElementById("scaleSlider");
+scaleSlider.value = 1;
+var speedSlider = document.getElementById("speedSlider");
+speedSlider.value = 1;
+var xSlider=document.getElementById("xSlider");
+xSlider.value = 0;
+var zSlider=document.getElementById("zSlider");
+zSlider.value = 45;
+
+function drawLine(x1,y1,x2,y2,color,width){
+  context.beginPath();
+  context.lineWidth=width || "1";
+  context.strokeStyle=color;
+  context.moveTo(x1,y1);
+  context.lineTo(x2,y2);
+  context.stroke();
+};
+function Box(speed){
+  this.size = 400;
+  this.angle = 0;
+  this.speed = speed || 1;
+  this.scale = 1;
+  this.rotaZ = Math.PI/4;
+  this.rotaX = 0;
+};
+Box.prototype.draw = function(){
+  var color = "black";
+  context.strokeStyle=color;
+
+
+  var a =(this.size/2)*Math.cos(this.angle);
+  var b =(this.size/2)*Math.sin(this.angle);
+
+
+  context.beginPath();
+  context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
+  context.lineTo(-b,(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
+  context.lineTo(b,-(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.lineTo(0,(-this.size/2)*Math.cos(this.rotaX))
+  context.stroke();
+
+
+  context.beginPath();
+  context.moveTo(0,-(this.size/2)*Math.cos(this.rotaX));
+  context.lineTo(-a,-(this.size/2)*Math.sin(this.rotaX)*Math.sin(this.angle));
+  context.lineTo(0,(this.size/2)*Math.cos(this.rotaX));
+  context.lineTo(a,(this.size/2)*Math.sin(this.rotaX)*Math.sin(this.angle));
+  context.lineTo(0,-(this.size/2)*Math.cos(this.rotaX))
+  context.stroke();
+
+
+  context.beginPath();
+  context.moveTo(-b,(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.lineTo(-a,-(this.size/2)*Math.sin(this.rotaX)*Math.sin(this.angle));
+  context.lineTo(b,-(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.lineTo(a,(this.size/2)*Math.sin(this.rotaX)*Math.sin(this.angle));
+  context.lineTo(-b,(this.size/2)*Math.sin(this.rotaX)*(Math.cos(this.angle)));
+  context.stroke();
+
+
+};
+Box.prototype.update = function(){
+  this.angle = (this.angle + Math.PI * 0.005 * this.speed) % (2*Math.PI);
+}
+window.onload = function start(){
+  var box=new Box(speedSlider.value);
+  function draw(){
+    canvas.width=canvas.width;
+    context.translate(300,300);
+    context.rotate(box.rotaZ);
+    context.scale(box.scale,box.scale);
+    context.save();
+    box.draw();
+    box.update();
+    context.restore();
+    window.requestAnimationFrame(draw);
+  };
+  function updateSpeed(){
+    box.speed=speedSlider.value;
+  }
+  function updateScale(){
+    box.scale=scaleSlider.value;
+  }
+  function updateRotaZ(){
+    box.rotaZ=zSlider.value/360*2*Math.PI;
+  }
+  function updateRotaX(){
+    box.rotaX=xSlider.value/360*2*Math.PI;
+  }
+  scaleSlider.addEventListener("input",updateScale);
+  speedSlider.addEventListener("input",updateSpeed);
+  zSlider.addEventListener("input",updateRotaZ);
+  xSlider.addEventListener("input",updateRotaX);
+  draw();
+}
+</script>

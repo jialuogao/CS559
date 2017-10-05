@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Programming Assignment 1</title>
+</head>
+<body>
+	<h2 style="color:#66CCFF">TOP view of the CS building and UWM logo by using only Javascript</h2>
+	<button id="trigger" stype="fontsize:30px"> Click to Show a 2D Picture </button>
+
+	<button id="cleaner" stype="fontsize:30px"> Click to Clean the Drawing </button>
+	</br>
+	<canvas id="myCanvas"
+	 width="1000"
+	 height="700">
+	</canvas>
+</body>
+</html>
+<script type="text/javascript">
+	var scale=1.5;
+	var drawed=false;
+	var canvas=document.getElementById('myCanvas');
+	var context=canvas.getContext('2d');
+	document.getElementById('cleaner').onclick=function(){
+		canvas.width=canvas.width;
+		drawed=false;
+	}
+	document.getElementById('trigger').onclick=draw;
+	function draw(){
+		if(!drawed){
+			context.lineWidth = 1;
+			context.fillStyle="blue";
+			context.beginPath();
+			context.moveTo(60*scale,50*scale);
+			context.lineTo(383*scale,196*scale);
+      context.lineTo(385*scale,222*scale);
+      context.lineTo(390*scale,222*scale);
+      context.lineTo(390*scale,340*scale);
+      context.lineTo(240*scale,340*scale);
+      context.lineTo(240*scale,290*scale);
+      context.lineTo(200*scale,290*scale);
+      context.lineTo(200*scale,340*scale);
+      context.lineTo(85*scale,340*scale);
+      context.lineTo(85*scale,200*scale);
+      context.lineTo(75*scale,160*scale);
+			context.fill();
+			context.closePath();
+
+			context.fillStyle="white";
+			context.beginPath();
+			var fontsize=40*scale;
+			context.font=fontsize+"px Arial";
+			context.fillText("CS Building",140*scale,270*scale);
+			context.fillStyle="Black";
+			context.fillText("Top View",180*scale,70*scale);
+
+			var centerX=170*scale;
+      var centerY=180*scale;
+      var x=centerX;
+      var y=centerY;
+      context.fillStyle="red";
+			context.beginPath();
+			context.arc(x,y,40*scale,0,2*Math.PI);
+			context.fill();
+      context.closePath();
+
+      context.fillStyle="gray";
+      context.beginPath();
+      context.moveTo(x-=10*scale,y-=23*scale);
+      context.lineTo(x,y+=40*scale);
+      context.lineTo(x-=10*scale,y);
+      context.lineTo(x,y-=40*scale);
+			context.fill();
+			context.beginPath();
+			context.moveTo(x+=31*scale,y);
+      context.lineTo(x,y+=40*scale);
+      context.lineTo(x-=10*scale,y);
+      context.lineTo(x,y-=40*scale);
+			context.fill();
+      context.beginPath();
+			context.moveTo(x+=12*scale,y);
+      context.lineTo(x,y+=15*scale,y);
+      context.lineTo(x-=1*scale,y+=2*scale);
+      context.lineTo(x-=11*scale,y+=35*scale);
+      context.lineTo(x-=7*scale,y+=4*scale);
+			context.lineTo(x,y+=-50*scale);
+			context.fill();
+      context.beginPath();
+      context.moveTo(x+=38*scale,y-=6*scale);
+      context.lineTo(x,y+=15*scale);
+      context.lineTo(x-=1*scale,y+=2*scale);
+      context.lineTo(x-=11*scale,y+=35*scale);
+      context.lineTo(x-=7*scale,y+=4*scale);
+			context.lineTo(x,y+=-50*scale);
+			context.fill();
+
+      x=centerX;
+      y=centerY;
+      context.fillStyle="white";
+      context.beginPath();
+      context.moveTo(x-=32*scale,y-=19*scale);
+      context.lineTo(x+=15*scale,y);
+      context.lineTo(x,y+=15*scale);
+      context.lineTo(x-=1*scale,y+=2*scale);
+      context.lineTo(x+=4*scale,y+=15*scale);
+      context.lineTo(x+=4*scale,y-=15*scale);
+      context.lineTo(x-=1*scale,y-=2*scale);
+      context.lineTo(x,y-=15*scale);
+      context.lineTo(x+=15*scale,y);
+      context.lineTo(x,y+=15*scale);
+      context.lineTo(x-=1*scale,y+=2*scale);
+      context.lineTo(x+=4*scale,y+=15*scale);
+      context.lineTo(x+=4*scale,y-=15*scale);
+      context.lineTo(x-=1*scale,y-=2*scale);
+      context.lineTo(x,y-=15*scale);
+      context.lineTo(x+=15*scale,y);
+      context.lineTo(x,y+=15*scale);
+      context.lineTo(x-=1*scale,y+=2*scale);
+      context.lineTo(x-=11*scale,y+=35*scale);
+      context.lineTo(x-=13*scale,y);
+      context.lineTo(x-=3*scale,y-=10*scale);
+      context.lineTo(x-=3*scale,y+=10*scale);
+      context.lineTo(x-=13*scale,y);
+      context.lineTo(x-=11*scale,y-=35*scale);
+      context.lineTo(x-=1*scale,y+=2*scale);
+      context.fill();
+      context.closePath();
+
+      x=centerX;
+      y=centerY;
+      context.fillStyle="silver";
+      context.beginPath();
+      context.moveTo(x-=32*scale,y-=19*scale);
+      context.lineTo(x+=7*scale,y-=4*scale);
+      context.lineTo(x+=15*scale,y);
+      context.lineTo(x-=7*scale,y+=4*scale);
+			context.fill();
+      context.moveTo(x+=6*scale,y);
+      context.lineTo(x+=7*scale,y-=4*scale);
+      context.lineTo(x+=15*scale,y);
+      context.lineTo(x-=7*scale,y+=4*scale);
+			context.fill();
+      context.moveTo(x+=6*scale,y);
+      context.lineTo(x+=7*scale,y-=4*scale);
+      context.lineTo(x+=15*scale,y);
+      context.lineTo(x-=7*scale,y+=4*scale);
+			context.fill();
+		};
+		drawed=true;
+	};
+	window.onload=draw();
+</script>
