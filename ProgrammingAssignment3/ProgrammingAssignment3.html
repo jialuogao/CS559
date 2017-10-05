@@ -7,13 +7,11 @@
   <body>
     <div style="float:left; width:70%"><canvas id="canvas" height="900" width="1000">
     </canvas></div>
-
     <div style="float:left; width:15%">
       <div><h3>Rotate By Z Axis</h3><input id="slider1" type="range" min="-50" max="50" /></div>
       <div><h3>Vision Level</h3><input id="slider3" class="vertical-range" type="range" min="-100" max="100" /></div>
       <div><h3>Numbers of objects</h3><input id="slider5" type="range" min="1" max="4"/></div>
     </div>
-
     <div style="float:left; width:15%">
         <div><h3>Skeleton Density</h3><input id="slider4" type="range" min="10" max="20" /></div>
         <div><button id="button" onclick="toggle();">Toggle Ortho/Persp</button></div>
@@ -24,12 +22,14 @@
     </div>
   </body>
 </html>
+
 <style>
   /*Got the following style code from https://codepen.io/ATC-test/pen/myPNqW*/
   .vertical-range {
     -webkit-appearance: slider-vertical;
   }
 </style>
+
 <script type="text/javascript">
   var canvas=document.getElementById('canvas');
   var context=canvas.getContext('2d');
@@ -48,8 +48,12 @@
   var bool1 = document.getElementById('bool1');
   var bool2 = document.getElementById('bool2');
   var bool3 = document.getElementById('bool3');
-
   var persp = true;
+  var axis1 = [1,0,0];
+  var axis2 = [0,1,0];
+  var axis3 = [0,0,1];
+  var ag = 0;
+
   function moveToTx(x,y,z,Tx){
     var location = [x,y,z];
     var locationTx = m4.transformPoint(Tx,location);
@@ -107,7 +111,6 @@
     }
   }
 
-
   function drawAxes(Tx){
     moveToTx(0,0,0,Tx);
     lineToTx(500,0,0,Tx);
@@ -120,10 +123,6 @@
     context.stroke();
   }
 
-  var axis1 = [1,0,0];
-  var axis2 = [0,1,0];
-  var axis3 = [0,0,1];
-  var ag = 0;
   function draw() {
     canvas.width=canvas.width;
     var n = document.getElementById("slider4").value;
@@ -152,7 +151,6 @@
       drawAxes(Tmcpv);
     }
     drawShape(200,100,ag,Tmcpv,n,turnVert,turnHori,numberOO);
-
     update();
     window.requestAnimationFrame(draw);
   }
