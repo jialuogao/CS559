@@ -101,35 +101,9 @@
       drawSkeleton2(r1,r2,TempTx);
     }
     if(count>0){
-      drawShapeRec(r1,r2,ag,Tx,n,turnVert,turnHori,count)
-    }
-  }
-  function drawShapeRec(r1,r2,ag,Tx,n,turnVert,turnHori,count){
-    count--;
-    var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tx);
-    var Tanimation = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
-    ag =- ag*3;
-    var angleD = Math.PI*2/n;
-    for(var i = 0 ; i <= n ; i ++){
-      var ag1, ag2;
-      if(turnVert){
-        ag1 = ag;
-      }
-      else {
-        ag1 = 0;
-      }
-      if(turnHori){
-        ag2 = ag;
-      }
-      else{
-        ag2 = 0;
-      }
-      drawSkeleton1(r1,r2,(ag1+i*angleD),Tanimation);
-      var TempTx = m4.multiply(m4.axisRotation(axis3,ag2+i*angleD),Tanimation);
-      drawSkeleton2(r1,r2,TempTx);
-    }
-    if(count>0){
-      drawShapeRec(r1,r2,ag,Tanimation,n,turnVert,turnHori,count);
+      var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tx);
+      var Tx = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
+      drawShape(r1,r2,3*ag,Tx,n,turnVert,turnHori,count)
     }
   }
 
