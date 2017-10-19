@@ -78,7 +78,7 @@
     triangles.push(tri);
   }
   // draw horizontal skeleton (horizontal circle)
-  function drawSkeleton1(r1,r2,ag,Tx,angleD){
+  function setUpTriangles(r1,r2,ag,Tx,angleD){
     var pSet = [];
     moveToTx(r1-Math.cos(ag)*r2,0,r2*Math.sin(ag),Tx);
     var tempTri = [];
@@ -86,25 +86,9 @@
       var x = (r1-Math.cos(ag)*r2)*Math.cos(j);
       var y = (r1-Math.cos(ag)*r2)*Math.sin(j);
       var z = r2*Math.sin(ag);
-      //lineToTx(x,y,z,Tx);
       pSet.push([x,y,z]);
     }
-    context.stroke();
     return pSet;
-  }
-  // {tempTri.push[x,y,z];
-  // if(tempTri.length > 2){
-  //   addTri([tempTri[0],tempTri[1],tempTri[2],"red"]);
-  //   tempTri = [];
-  // }}
-  //draw vertical skeleton (vertical circle)
-  function drawSkeleton2(r1,r2,Tx){
-    moveToTx((r1-r2),0,0,Tx);
-    for(var j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
-      lineToTx(r1-r2*Math.cos(j),0,
-               r2*Math.sin(j),Tx);
-    }
-    context.stroke();
   }
   //draw the whole skeleton and its children recursively
   function drawShape(r1,r2,ag,Tx,n,turnVert,turnHori,count){
@@ -112,7 +96,7 @@
     ag =- ag;
     var angleD = Math.PI*2/n;   //angle between single skeletons
     var pSets = [];
-    //draw skeleton
+    // calculate vertex
     for(var i = 0 ; i <= n ; i ++){
       var ag1, ag2;
       if(turnVert){
@@ -127,10 +111,9 @@
       else{
         ag2 = 0;
       }
-      pSets[i] = drawSkeleton1(r1,r2,(ag1+i*angleD),Tx,angleD);
-      //var TempTx = m4.multiply(m4.axisRotation(axis3,ag2+i*angleD),Tx);
-      //drawSkeleton2(r1,r2,TempTx);
+      pSets[i] = setUpTriangles(r1,r2,(ag1+i*angleD),Tx,angleD);
     }
+    // setup triangles
     for(var i = 0; i < pSets.length; i++){
       var pSet1 = pSets[i];
       var iPlus1 = i + 1;
