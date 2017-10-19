@@ -45,7 +45,7 @@
   var slider4 = document.getElementById('slider4');     //skeleton density
   slider4.value = 20;
   var slider5 = document.getElementById('slider5');     //number of object
-  slider5.value = 1;
+  slider5.value = 3;
   var bool1 = document.getElementById('bool1');         //turn off motion 1
   var bool2 = document.getElementById('bool2');         //turn off motion 2
   var bool3 = document.getElementById('bool3');         //hide axes
@@ -78,23 +78,23 @@
     triangles.push(tri);
   }
   // draw horizontal skeleton (horizontal circle)
-  function setUpTriangles(r1,r2,ag,Tx,angleD){
+  function setUpTriangles(r1,r2,ag1,ag2,Tx,angleD,Tmodel){
     var pSet = [];
-    moveToTx(r1-Math.cos(ag)*r2,0,r2*Math.sin(ag),Tx);
+    moveToTx(r1-Math.cos(ag1)*r2,0,r2*Math.sin(ag1),Tx);
     var tempTri = [];
     for(var j=angleD;j<2.001*Math.PI;j+=angleD){
-      var x = (r1-Math.cos(ag)*r2)*Math.cos(j);
-      var y = (r1-Math.cos(ag)*r2)*Math.sin(j);
-      var z = r2*Math.sin(ag);
-      pSet.push([x,y,z]);
+      var x = (r1-Math.cos(ag1)*r2)*Math.cos(j+ag2);
+      var y = (r1-Math.cos(ag1)*r2)*Math.sin(j+ag2);
+      var z = r2*Math.sin(ag1);
+      pSet.push(m4.transformPoint(Tmodel,[x,y,z]));
     }
     return pSet;
   }
-  //draw the whole skeleton and its children recursively
-  function drawShape(r1,r2,ag,Tx,n,turnVert,turnHori,count){
+  //calculating all the points
+  function drawShape(r1,r2,ag,Tx,n,turnVert,turnHori,count,Tmodel){
     count--;
     ag =- ag;
-    var angleD = Math.PI*2/n;   //angle between single skeletons
+    var angleD = Math.PI*2/n;   // full circle / density
     var pSets = [];
     // calculate vertex
     for(var i = 0 ; i <= n ; i ++){
@@ -111,7 +111,7 @@
       else{
         ag2 = 0;
       }
-      pSets[i] = setUpTriangles(r1,r2,(ag1+i*angleD),Tx,angleD);
+      pSets[i] = setUpTriangles(r1,r2,(ag1+i*angleD),ag2,Tx,angleD,Tmodel);
     }
     // setup triangles
     for(var i = 0; i < pSets.length; i++){
@@ -132,9 +132,9 @@
     }
     //draw smaller object by recursion
     if(count>0){
-      var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tx);
-      var Tx = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
-      drawShape(r1,r2,3*ag,Tx,n,turnVert,turnHori,count);
+      var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tmodel);
+      Tmodel = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
+      drawShape(r1,r2,3*ag,Tx,n,turnVert,turnHori,count,Tmodel);
     }
   }
   //draw x,y,z axes
@@ -181,28 +181,30 @@
     if(!HideAxes){
       drawAxes(Tmcpv);
     }
-    drawShape(200,100,ag,Tmcpv,n,turnVert,turnHori,numberOO);
+    // calculate triangles
+    drawShape(200,100,ag,Tmcpv,n,turnVert,turnHori,numberOO,m4.identity());
     var Tmc = m4.multiply(Tmodel,Tcamera);
+    //changing color
     for(var i=0;i<triangles.length;i++){
       var cam=m4.transformPoint(Tmc,triangles[i][1]);
-      triangles[i][3]="rgb(0,"+Math.floor(Math.pow((-cam[2]*0.17/255),3)*255)+",0)";
+      triangles[i][3]="rgb(0,"+Math.floor(((-cam[2]-850)/730)*255)+",0)";
     }
+    //painter's algo
     triangles.sort(function(a, b){
       a = parseInt(a[3].substring(6,10));
       b = parseInt(b[3].substring(6,10));
       return b-a;
     });
+    //draw triangles
     for(var i=0; i<triangles.length; i++){
       drawTriangle(triangles[i],Tmcpv);
     }
-
     update();
     window.requestAnimationFrame(draw);
   }
   //update for animation
   function update(){
     ag = (ag + Math.PI/320*slider2.value) % (Math.PI*2);  //change in angle for animation (scale with speed)
-    console.log("hello");
   }
   function toggle(){
     persp = !persp;
