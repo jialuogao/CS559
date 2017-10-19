@@ -43,7 +43,7 @@
   var slider3 = document.getElementById('slider3');     //vertical vision level
   slider3.value = 100;
   var slider4 = document.getElementById('slider4');     //skeleton density
-  slider4.value = 10;
+  slider4.value = 20;
   var slider5 = document.getElementById('slider5');     //number of object
   slider5.value = 1;
   var bool1 = document.getElementById('bool1');         //turn off motion 1
@@ -65,12 +65,12 @@
     var locationTx = m4.transformPoint(Tx,location);
     context.lineTo(locationTx[0],-locationTx[1]);
   }
-  function drawTriangle(tri,Tx){
+  function drawTriangle(tri){
     context.beginPath();
     context.fillStyle=tri[3];
-    moveToTx(tri[0][0],tri[0][1],tri[0][2],Tx);
-    lineToTx(tri[1][0],tri[1][1],tri[1][2],Tx);
-    lineToTx(tri[2][0],tri[2][1],tri[2][2],Tx);
+    moveToTx(tri[0][0],tri[0][1],tri[0][2],tri[4]);
+    lineToTx(tri[1][0],tri[1][1],tri[1][2],tri[4]);
+    lineToTx(tri[2][0],tri[2][1],tri[2][2],tri[4]);
     context.closePath();
     context.fill();
   }
@@ -126,8 +126,8 @@
         if(jPlus1 >= pSet1.length){
           jPlus1 = 0;
         }
-        addTri([pSet1[j],pSet1[jPlus1],pSet2[j],"green"]);
-        addTri([pSet2[j],pSet2[jPlus1],pSet1[jPlus1],"red"]);
+        addTri([pSet1[j],pSet1[jPlus1],pSet2[j],"green",Tx]);
+        addTri([pSet2[j],pSet2[jPlus1],pSet1[jPlus1],"green",Tx]);
       }
     }
     //draw smaller object by recursion
