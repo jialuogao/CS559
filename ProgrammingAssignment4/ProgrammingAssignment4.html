@@ -11,6 +11,7 @@
       <div><h3>Rotate By Z Axis</h3><input id="slider1" type="range" min="-50" max="50" /></div>
       <div><h3>Vision Level</h3><input id="slider3" class="vertical-range" type="range" min="-100" max="100" /></div>
       <div><h3>Numbers of objects</h3><input id="slider5" type="range" min="1" max="4"/></div>
+      <div><button id="button2" onclick="toggleFS();">Toggle Fill/Stroke</button></div>
     </div>
     <div style="float:left; width:15%">
         <div><h3>Skeleton Density</h3><input id="slider4" type="range" min="10" max="40" /></div>
@@ -50,6 +51,7 @@
   var bool2 = document.getElementById('bool2');         //turn off motion 2
   var bool3 = document.getElementById('bool3');         //hide axes
   var persp = true;                                     //boolean for toggle between ortho/persp
+  var fill = true;                                      //boolean for toggle between fill/stroke
   var axis1 = [1,0,0];                                  // x axis
   var axis2 = [0,1,0];                                  // y axis
   var axis3 = [0,0,1];                                  // z axis
@@ -72,7 +74,12 @@
     lineToTx(tri[1][0],tri[1][1],tri[1][2],tri[4]);
     lineToTx(tri[2][0],tri[2][1],tri[2][2],tri[4]);
     context.closePath();
-    context.fill();
+    if(fill){
+      context.fill();
+    }
+    else{
+      context.stroke();
+    }
   }
   function addTri(tri){
     triangles.push(tri);
@@ -208,6 +215,9 @@
   }
   function toggle(){
     persp = !persp;
+  }
+  function toggleFS(){
+    fill = !fill;
   }
   window.onload = draw;
 </script>
