@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>PA3</title>
+    <title>PA4</title>
     <script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
   </head>
   <body>
@@ -13,7 +13,7 @@
       <div><h3>Numbers of objects</h3><input id="slider5" type="range" min="1" max="4"/></div>
     </div>
     <div style="float:left; width:15%">
-        <div><h3>Skeleton Density</h3><input id="slider4" type="range" min="10" max="20" /></div>
+        <div><h3>Skeleton Density</h3><input id="slider4" type="range" min="10" max="40" /></div>
         <div><button id="button" onclick="toggle();">Toggle Ortho/Persp</button></div>
         <div><h3>Motion speed</h3><input id="slider2" type="range" min="0.5" max="4" step="0.05" /></div>
         <div><h3>Turn off motion 1</h3><input id="bool1" type="checkbox"/></div>
@@ -31,6 +31,7 @@
 </style>
 
 <script type="text/javascript">
+  "use strict";
   var canvas=document.getElementById('canvas');
   var context=canvas.getContext('2d');
   var m4=twgl.m4;
@@ -44,7 +45,7 @@
   var slider4 = document.getElementById('slider4');     //skeleton density
   slider4.value = 10;
   var slider5 = document.getElementById('slider5');     //number of object
-  slider5.value = 4;
+  slider5.value = 1;
   var bool1 = document.getElementById('bool1');         //turn off motion 1
   var bool2 = document.getElementById('bool2');         //turn off motion 2
   var bool3 = document.getElementById('bool3');         //hide axes
@@ -53,7 +54,7 @@
   var axis2 = [0,1,0];                                  // y axis
   var axis3 = [0,0,1];                                  // z axis
   var ag = 0;                                           //angle for animation
-
+  var triangles = [];
   function moveToTx(x,y,z,Tx){
     var location = [x,y,z];
     var locationTx = m4.transformPoint(Tx,location);
@@ -64,17 +65,38 @@
     var locationTx = m4.transformPoint(Tx,location);
     context.lineTo(locationTx[0],-locationTx[1]);
   }
-
+  function drawTriangle(tri,Tx){
+    context.beginPath();
+    context.fillStyle=tri[3];
+    moveToTx(tri[0][0],tri[0][1],tri[0][2],Tx);
+    lineToTx(tri[1][0],tri[1][1],tri[1][2],Tx);
+    lineToTx(tri[2][0],tri[2][1],tri[2][2],Tx);
+    context.closePath();
+    context.fill();
+  }
+  function addTri(tri){
+    triangles.push(tri);
+  }
   // draw horizontal skeleton (horizontal circle)
-  function drawSkeleton1(r1,r2,ag,Tx){
+  function drawSkeleton1(r1,r2,ag,Tx,angleD){
+    var pSet = [];
     moveToTx(r1-Math.cos(ag)*r2,0,r2*Math.sin(ag),Tx);
-    for(var j=Math.PI/32;j<2.001*Math.PI;j+=Math.PI/32){
-      lineToTx((r1-Math.cos(ag)*r2)*Math.cos(j),
-               (r1-Math.cos(ag)*r2)*Math.sin(j),
-               r2*Math.sin(ag),Tx);
+    var tempTri = [];
+    for(var j=angleD;j<2.001*Math.PI;j+=angleD){
+      var x = (r1-Math.cos(ag)*r2)*Math.cos(j);
+      var y = (r1-Math.cos(ag)*r2)*Math.sin(j);
+      var z = r2*Math.sin(ag);
+      //lineToTx(x,y,z,Tx);
+      pSet.push([x,y,z]);
     }
     context.stroke();
+    return pSet;
   }
+  // {tempTri.push[x,y,z];
+  // if(tempTri.length > 2){
+  //   addTri([tempTri[0],tempTri[1],tempTri[2],"red"]);
+  //   tempTri = [];
+  // }}
   //draw vertical skeleton (vertical circle)
   function drawSkeleton2(r1,r2,Tx){
     moveToTx((r1-r2),0,0,Tx);
@@ -89,6 +111,7 @@
     count--;
     ag =- ag;
     var angleD = Math.PI*2/n;   //angle between single skeletons
+    var pSets = [];
     //draw skeleton
     for(var i = 0 ; i <= n ; i ++){
       var ag1, ag2;
@@ -104,15 +127,31 @@
       else{
         ag2 = 0;
       }
-      drawSkeleton1(r1,r2,(ag1+i*angleD),Tx);
-      var TempTx = m4.multiply(m4.axisRotation(axis3,ag2+i*angleD),Tx);
-      drawSkeleton2(r1,r2,TempTx);
+      pSets[i] = drawSkeleton1(r1,r2,(ag1+i*angleD),Tx,angleD);
+      //var TempTx = m4.multiply(m4.axisRotation(axis3,ag2+i*angleD),Tx);
+      //drawSkeleton2(r1,r2,TempTx);
+    }
+    for(var i = 0; i < pSets.length; i++){
+      var pSet1 = pSets[i];
+      var iPlus1 = i + 1;
+      if(iPlus1 >= pSets.length){
+        iPlus1 = 0;
+      }
+      var pSet2 = pSets[iPlus1];
+      for(var j=0; j < pSet1.length; j++){
+        var jPlus1 = j + 1;
+        if(jPlus1 >= pSet1.length){
+          jPlus1 = 0;
+        }
+        addTri([pSet1[j],pSet1[jPlus1],pSet2[j],"green"]);
+        addTri([pSet2[j],pSet2[jPlus1],pSet1[jPlus1],"red"]);
+      }
     }
     //draw smaller object by recursion
     if(count>0){
       var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tx);
       var Tx = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
-      drawShape(r1,r2,3*ag,Tx,n,turnVert,turnHori,count)
+      drawShape(r1,r2,3*ag,Tx,n,turnVert,turnHori,count);
     }
   }
   //draw x,y,z axes
@@ -129,7 +168,8 @@
   }
   //draw picture
   function draw() {
-    canvas.width=canvas.width;
+    canvas.width = canvas.width;
+    triangles = [];
     var n = document.getElementById("slider4").value;   //density
     var angle1 = slider1.value*0.02*Math.PI;            //rotation angle
     var level = (slider3.value-100)*0.005*Math.PI;      //vision level
@@ -159,12 +199,27 @@
       drawAxes(Tmcpv);
     }
     drawShape(200,100,ag,Tmcpv,n,turnVert,turnHori,numberOO);
+    var Tmc = m4.multiply(Tmodel,Tcamera);
+    for(var i=0;i<triangles.length;i++){
+      var cam=m4.transformPoint(Tmc,triangles[i][1]);
+      triangles[i][3]="rgb(0,"+Math.floor(Math.pow((-cam[2]*0.17/255),3)*255)+",0)";
+    }
+    triangles.sort(function(a, b){
+      a = parseInt(a[3].substring(6,10));
+      b = parseInt(b[3].substring(6,10));
+      return b-a;
+    });
+    for(var i=0; i<triangles.length; i++){
+      drawTriangle(triangles[i],Tmcpv);
+    }
+
     update();
     window.requestAnimationFrame(draw);
   }
   //update for animation
   function update(){
     ag = (ag + Math.PI/320*slider2.value) % (Math.PI*2);  //change in angle for animation (scale with speed)
+    console.log("hello");
   }
   function toggle(){
     persp = !persp;
