@@ -1,7 +1,7 @@
-//Link: https://goo.gl/oBfoLX
+https://goo.gl/WCzN1n
 
-//Vertex:
-
+#ifdef VS 
+ 
 precision highp float;
 attribute vec3 position;
 attribute vec3 normal;
@@ -27,35 +27,37 @@ void main()
   localPos = position;
   gl_Position = projectionMatrix * pos;
 }
-
-//Fragment:
-
+ 
+#else 
+ 
 precision highp float;
 varying vec3 fNormal;
 varying vec3 fPosition;
 varying vec3 vColor;
 uniform float time;
 const float Pi = 3.1415926;
-const float ambient_coeff   = 0.5;
+const float ambient_coeff   = 0.3;
 const float specular_coeff  = 2.0;
-const float specular_exp    = 32.0;
+const float specular_exp    = 50.0;
 varying vec3 localPos;
 const vec3  light_color     = vec3(1.0,1.0,1.0);
 
 void main()
 {
-  float angle = mod(time * 20.0 , 2.0*Pi);
+  float angle = mod(time * 15.0 , 2.0*Pi);
+  // Rotating light
   vec3 dir = vec3(cos(angle),0,sin(angle));
   vec3 color = vColor;
   vec3 l = normalize(dir);
   vec3 n = normalize(fNormal);
   vec3 e = normalize(-fPosition);
   vec3 h = normalize (e+l);
+  // Fixed light
   vec3 dir2 = vec3(0.0,1.0,0.0);
   vec3 l2 = normalize(dir2);
   vec3 h2 = normalize(e+l2);
 
-
+  // Three color circles
   color.r = smoothstep(0.0, 0.4, mod(sqrt(pow(localPos.x,2.0)+pow(localPos.y,2.0)),0.4))+0.5;
   if(color.r>1.0){
     color.r = 2.0 - color.r;
@@ -73,7 +75,7 @@ void main()
   color.b=pow(color.b,3.0);
   
   
-  
+  // Three color rotation
   float r=0.0;
   float g=0.0;
   float b=0.0;
@@ -106,11 +108,12 @@ void main()
   
   
   
-  float diffuse = 0.5 + dot(fNormal,dir);
-  float diffuse2 = 0.5 + dot(fNormal,dir2);
+  float diffuse = 0.2 + dot(fNormal,dir);
   vec3 ambient_color  = ambient_coeff  * color;
   vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * light_color;
   vec3 specular2 = specular_coeff * pow(max(0.0,dot(n,h2)),specular_exp) * light_color;
 
-  gl_FragColor = vec4(ambient_color+specular_color*diffuse+diffuse2*specular2+vColor2*0.15,1.0);
+  gl_FragColor = vec4(ambient_color+color*diffuse+specular_color+specular2+vColor2*0.2,1.0);
 }
+ 
+#endif
