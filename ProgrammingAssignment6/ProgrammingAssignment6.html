@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PA6</title>
+    <script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
+  </head>
+  <body>
+    <div style="float:left; width:70%"><canvas id="canvas" height="900" width="1000">
+    </canvas></div>
+    <div style="float:left; width:15%">
+      <div><h3>Rotate By Z Axis</h3><input id="slider1" type="range" min="-50" max="50" /></div>
+      <div><h3>Vision Level</h3><input id="slider3" class="vertical-range" type="range" min="-100" max="100" /></div>
+      <div><h3>Numbers of objects</h3><input id="slider5" type="range" min="1" max="4"/></div>
+      <div><button id="button2" onclick="toggleFS();">Toggle Fill/Stroke</button></div>
+    </div>
+    <div style="float:left; width:15%">
+        <div><h3>Triangle Density</h3><input id="slider4" type="range" min="10" max="40" /></div>
+        <div><button id="button" onclick="toggle();">Toggle Ortho/Persp</button></div>
+        <div><h3>Motion speed</h3><input id="slider2" type="range" min="0.5" max="4" step="0.05" /></div>
+        <div><h3>Turn off motion 1</h3><input id="bool1" type="checkbox"/></div>
+        <div><h3>Turn off motion 2</h3><input id="bool2" type="checkbox"/></div>
+        <div><h3>Hide Axis</h3><input id="bool3" type="checkbox"/></div>
+    </div>
+  </body>
+
+  <style>
+    /*Got the following style code from https://codepen.io/ATC-test/pen/myPNqW*/
+    .vertical-range {
+      -webkit-appearance: slider-vertical;
+    }
+  </style>
+
+  <script id="vs" type="not-js">
+
+  </script>
+  <script id="fs" type="not-js">
+
+  </script>
+
+  <script type="text/javascript">
+    "use strict";
+    var canvas = document.getElementById('canvas');
+    var gl = canvas.getContext('webgl');
+    var m4 = twgl.m4;
+
+    var slider1 = document.getElementById('slider1');     //value for rotation around Z axis
+    slider1.value = -10;
+    var slider2 = document.getElementById('slider2');     //speed
+    slider2.value = 2;
+    var slider3 = document.getElementById('slider3');     //vertical vision level
+    slider3.value = 100;
+    var slider4 = document.getElementById('slider4');     //skeleton density
+    slider4.value = 20;
+    var slider5 = document.getElementById('slider5');     //number of object
+    slider5.value = 3;
+    var bool1 = document.getElementById('bool1');         //turn off motion 1
+    var bool2 = document.getElementById('bool2');         //turn off motion 2
+    var bool3 = document.getElementById('bool3');         //hide axes
+    var persp = true;                                     //boolean for toggle between ortho/persp
+    var fill = true;                                      //boolean for toggle between fill/stroke
+    var axis1 = [1,0,0];                                  // x axis
+    var axis2 = [0,1,0];                                  // y axis
+    var axis3 = [0,0,1];                                  // z axis
+    var ag = 0;                                           //angle for animation
+  </script>
