@@ -4,9 +4,10 @@
     <title>PA6</title>
     <script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
   </head>
-  <body>
-    <div style="float:left; width:70%"><canvas id="canvas" height="900" width="1000">
-    </canvas></div>
+  <body onload="start()">
+    <div style="float:left; width:70%">
+      <canvas id="canvas" height="900" width="1000"></canvas>
+    </div>
     <div style="float:left; width:15%">
       <div><h3>Rotate By Z Axis</h3><input id="slider1" type="range" min="-50" max="50" /></div>
       <div><h3>Vision Level</h3><input id="slider3" class="vertical-range" type="range" min="-100" max="100" /></div>
@@ -31,13 +32,27 @@
   </style>
 
   <script id="vs" type="not-js">
+    attribute vec3 vPosition;
+    attribute vec3 vColor;
+    varying vec3 fColor;
+    uniform mat4 uMVP;
 
+    void main(void){
+      gl_Position = uMVP * vec4(vPosition, 1.0);
+      fColor = vColor;
+    }
   </script>
   <script id="fs" type="not-js">
+    precision highp float;
+    varying vec3 fColor;
 
+    void main(void) {
+     gl_FragColor = vec4(fColor, 1.0);
+    }
   </script>
 
   <script type="text/javascript">
+  function start(){
     "use strict";
     var canvas = document.getElementById('canvas');
     var gl = canvas.getContext('webgl');
@@ -62,4 +77,214 @@
     var axis2 = [0,1,0];                                  // y axis
     var axis3 = [0,0,1];                                  // z axis
     var ag = 0;                                           //angle for animation
+
+    var vertexSource = document.getElementById("vs").text;
+    var fragmentSource = document.getElementById("fs").text;
+
+    var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader,vertexSource);
+    gl.compileShader(vertexShader);
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+      alert(gl.getShaderInfoLog(vertexShader)); return null; }
+
+      var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(fragmentShader,fragmentSource);
+      gl.compileShader(fragmentShader);
+      if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+        alert(gl.getShaderInfoLog(fragmentShader)); return null; }
+
+    // Attach the shaders and link
+    var shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+      alert("Could not initialize shaders"); }
+    gl.useProgram(shaderProgram);
+
+    // with the vertex shader, we need to pass it positions
+    // as an attribute - so set up that communication
+    shaderProgram.PositionAttribute = gl.getAttribLocation(shaderProgram, "vPosition");
+    gl.enableVertexAttribArray(shaderProgram.PositionAttribute);
+
+    shaderProgram.ColorAttribute = gl.getAttribLocation(shaderProgram, "vColor");
+    gl.enableVertexAttribArray(shaderProgram.ColorAttribute);
+
+    // this gives us access to the matrix uniform
+    shaderProgram.MVPmatrix = gl.getUniformLocation(shaderProgram,"uMVP");
+
+    // Data ...
+
+    // vertex positions
+    var vertexPos = new Float32Array ();
+
+    // vertex colors
+    var vertexColors = new Float32Array ([
+        1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,
+        1.0, 1.0, 0.0,   1.0, 1.0, 0.0,   1.0, 1.0, 0.0 ]);
+
+    var vertexMat4;
+    // we need to put the vertices into a buffer so we can
+    // block transfer them to the graphics hardware
+    var trianglePosBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, trianglePosBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertexPos, gl.STATIC_DRAW);
+    trianglePosBuffer.itemSize = 3;
+    trianglePosBuffer.numItems = vertexPos.length;
+
+    // a buffer for colors
+    var colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertexColors, gl.STATIC_DRAW);
+    colorBuffer.itemSize = 3;
+    colorBuffer.numItems = 12;
+
+    // draw horizontal skeleton (horizontal circle)
+    function setUpTriangles(r1,r2,ag1,ag2,Tx,angleD,Tmodel){
+      var pSet = [];
+      moveToTx(r1-Math.cos(ag1)*r2,0,r2*Math.sin(ag1),Tx);
+      var tempTri = [];
+      for(var j=angleD;j<2.001*Math.PI;j+=angleD){
+        var x = (r1-Math.cos(ag1)*r2)*Math.cos(j+ag2);
+        var y = (r1-Math.cos(ag1)*r2)*Math.sin(j+ag2);
+        var z = r2*Math.sin(ag1);
+        pSet.push(m4.transformPoint(Tmodel,[x,y,z]));
+      }
+      return pSet;
+    }
+    //calculating all the points
+    function drawShape(r1,r2,ag,Tx,n,turnVert,turnHori,count,Tmodel){
+      count--;
+      ag =- ag;
+      var angleD = Math.PI*2/n;   // full circle / density
+      var pSets = [];
+      // calculate vertex
+      for(var i = 0 ; i <= n ; i ++){
+        var ag1, ag2;
+        if(turnVert){
+          ag1 = ag;
+        }
+        else {
+          ag1 = 0;
+        }
+        if(turnHori){
+          ag2 = ag;
+        }
+        else{
+          ag2 = 0;
+        }
+        pSets[i] = setUpTriangles(r1,r2,(ag1+i*angleD),ag2,Tx,angleD,Tmodel);
+      }
+      // setup triangles
+      for(var i = 0; i < pSets.length; i++){
+        var pSet1 = pSets[i];
+        var iPlus1 = i + 1;
+        if(iPlus1 >= pSets.length){
+          iPlus1 = 0;
+        }
+        var pSet2 = pSets[iPlus1];
+        for(var j=0; j < pSet1.length; j++){
+          var jPlus1 = j + 1;
+          if(jPlus1 >= pSet1.length){
+            jPlus1 = 0;
+          }
+          point1_1 = pSet1[j];
+          point1_2 = pSet1[jPlus1];
+          point1_3 = pSet2[j];
+
+          point2_1 = pSet2[j];
+          point2_2 = pSet2[jPlus1];
+          point2_3 = pSet1[jPlus1];
+          vertexPos.push(point1_1.x);
+          vertexPos.push(point1_1.y);
+          vertexPos.push(point1_1.z);
+          vertexPos.push(point1_2.x);
+          vertexPos.push(point1_2.y);
+          vertexPos.push(point1_2.z);
+          vertexPos.push(point1_3.x);
+          vertexPos.push(point1_3.y);
+          vertexPos.push(point1_3.z);
+          vertexPos.push(point2_1.x);
+          vertexPos.push(point2_1.y);
+          vertexPos.push(point2_1.z);
+          vertexPos.push(point2_2.x);
+          vertexPos.push(point2_2.y);
+          vertexPos.push(point2_2.z);
+          vertexPos.push(point2_3.x);
+          vertexPos.push(point2_3.y);
+          vertexPos.push(point2_3.z);
+          vertexMat4.push(Tx);
+          vertexMat4.push(Tx);
+        }
+      }
+      //draw smaller object by recursion
+      // if(count>0){
+      //   var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tmodel);
+      //   Tmodel = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
+      //   drawShape(r1,r2,3*ag,Tx,n,turnVert,turnHori,count,Tmodel);
+      // }
+    }
+
+    // Scene (re-)draw routine
+    function draw() {
+
+      var n = document.getElementById("slider4").value;   //density
+      var angle1 = slider1.value*0.02*Math.PI;            //rotation angle
+      var level = (slider3.value-100)*0.005*Math.PI;      //vision level
+      var turnVert = !bool1.checked;                      //motion 1
+      var turnHori = !bool2.checked;                      //motion 2
+      var HideAxes = bool3.checked;                       //hide axis
+      var numberOO = slider5.value;                       //number of object
+
+      var eye = [800,800,800*Math.cos(level)];
+      var target = [0,0,0];
+      var up = [0,0,1];
+
+      var Tmodel = m4.axisRotation(axis3,angle1);
+      var Tcamera = m4.inverse(m4.lookAt(eye,target,up));
+      var Tprojection;
+
+      //toggle feature
+      if(persp){
+        Tprojection=m4.perspective(Math.PI/8,1,3,400);
+      }
+      else {
+        Tprojection=m4.ortho(-250,250,-200,300,-2,2);
+      }
+
+      var Tmvp=m4.multiply(m4.multiply(Tmodel,Tcamera),Tprojection);
+
+        // Clear screen, prepare for rendering
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.enable(gl.DEPTH_TEST);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Set up uniforms & attributes
+        gl.uniformMatrix4fv(shaderProgram.MVPmatrix,false,tMVP);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.vertexAttribPointer(shaderProgram.ColorAttribute, colorBuffer.itemSize,
+          gl.FLOAT,false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglePosBuffer);
+        gl.vertexAttribPointer(shaderProgram.PositionAttribute, trianglePosBuffer.itemSize,
+          gl.FLOAT, false, 0, 0);
+
+	    // Do the drawing
+        gl.drawArrays(gl.TRIANGLES, 0, trianglePosBuffer.numItems);
+        update();
+        window.requestAnimationFrame(draw);
+      }
+      //update for animation
+      function update(){
+        ag = (ag + Math.PI/320*slider2.value) % (Math.PI*2);  //change in angle for animation (scale with speed)
+      }
+      function toggle(){
+        persp = !persp;
+      }
+      function toggleFS(){
+        fill = !fill;
+      }
+    }
   </script>
