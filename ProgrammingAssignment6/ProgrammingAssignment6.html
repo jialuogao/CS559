@@ -120,7 +120,6 @@
       vec3 specular2 = specular_coeff * pow(max(0.0,dot(n,h2)),specular_exp*2.0) * light_color;
 
       gl_FragColor = vec4(ambient_color+color*diffuse+specular_color+specular2*0.5+vColor2*0.3,1.0);
-      //gl_FragColor = vec4(color*diffuse,1.0);
     }
   </script>
 
