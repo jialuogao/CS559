@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-//http://jsbin.com/reyifuguta/edit?html,js,output
 <html>
   <head>
     <title>PA6</title>
@@ -21,7 +20,6 @@
         <div><h3>Motion speed</h3><input id="slider2" type="range" min="0.5" max="4" step="0.05" /></div>
         <div><h3>Turn off motion 1</h3><input id="bool1" type="checkbox"/></div>
         <div><h3>Turn off motion 2</h3><input id="bool2" type="checkbox"/></div>
-        <div><h3>Hide Axis</h3><input id="bool3" type="checkbox"/></div>
     </div>
   </body>
 
@@ -35,20 +33,91 @@
   <script id="vs" type="not-js">
     attribute vec3 vPosition;
     attribute vec3 vColor;
+    attribute vec3 vNormal;
     varying vec3 fColor;
     uniform mat4 uMVP;
+    varying vec3 fNormal;
+    varying vec3 fPosition;
+    varying vec3 world;
 
     void main(void){
-      gl_Position = uMVP * vec4(vPosition, 1.0);
       fColor = vColor;
+      fNormal = normalize(vNormal);
+      fPosition = vPosition;
+      world = (uMVP * vec4(vPosition, 1.0)).xyz;
+      gl_Position = uMVP * vec4(vPosition, 1.0);
     }
   </script>
   <script id="fs" type="not-js">
     precision highp float;
     varying vec3 fColor;
+    varying vec3 fNormal;
+    varying vec3 fPosition;
+    varying vec3 world;
+    const float Pi=3.1415926;
+    const float ambient_coeff   = 0.3;
+    const float specular_coeff  = 1.0;
+    const float specular_exp    = 50.0;
+    const vec3  light_color     = vec3(1.0,1.0,1.0);
+    void main()
+    {
+      vec3 dir = vec3(cos(angle),0,sin(angle));
+      vec3 color = normalize(fColor);
+      vec3 l = normalize(dir);
+      vec3 n = normalize(fNormal);
+      vec3 e = normalize(-fPosition);
+      vec3 h = normalize ((e+l)/2.0);
+      // Fixed light
+      vec3 dir2 = vec3(0.5,0.5,1.0);
+      vec3 l2 = normalize(dir2);
+      vec3 h2 = normalize((e+l2)/2.0);
 
-    void main(void) {
-     gl_FragColor = vec4(fColor, 1.0);
+      // Three color circles
+      color.r = smoothstep(0.0, 20.0, mod(sqrt(pow(fPosition.x,2.0)+pow(fPosition.y,2.0)),20.0))+0.5;
+      color.g = smoothstep(0.0, 20.0, mod(sqrt(pow(fPosition.x,2.0)+pow(fPosition.z,2.0)),20.0))+0.5;
+      color.b = smoothstep(0.0, 20.0, mod(sqrt(pow(fPosition.z,2.0)+pow(fPosition.y,2.0)),20.0))+0.5;
+
+
+      // Three color rotation
+      float r=0.0;
+      float g=0.0;
+      float b=0.0;
+      float arctan;
+      if(fPosition.x>0.0){
+        arctan=atan(fPosition.y/fPosition.x)+0.5*Pi;
+      }
+      else{
+        arctan=atan(fPosition.y/fPosition.x)+3.0/2.0*Pi;
+      }
+      if((arctan-angle<2.0/3.0*Pi) && (arctan-angle>0.0)){
+        r = smoothstep(0.0, Pi*2.0/3.0, arctan-angle);
+      }
+      else if(arctan-angle+2.0*Pi<2.0/3.0*Pi && arctan-angle<0.0){
+        r = smoothstep(0.0, Pi*2.0/3.0, arctan-angle+2.0*Pi);
+      }
+      if((arctan-angle<4.0/3.0*Pi) && (arctan-angle>2.0/3.0*Pi)){
+        g = smoothstep(0.0, Pi*2.0/3.0, arctan-angle-2.0/3.0*Pi);
+      }
+      else if(arctan-angle+2.0*Pi<4.0/3.0*Pi && arctan-angle+2.0*Pi>2.0/3.0*Pi){
+        g = smoothstep(0.0, Pi*2.0/3.0, arctan-angle+2.0*Pi-2.0/3.0*Pi);
+      }
+      if((arctan-angle<2.0*Pi) && (arctan-angle>4.0/3.0*Pi)){
+        b = smoothstep(0.0, Pi*2.0/3.0, arctan-angle-4.0/3.0*Pi);
+      }
+      else if(arctan-angle+2.0*Pi<2.0*Pi && arctan-angle+2.0*Pi>4.0/3.0*Pi){
+        b = smoothstep(0.0, Pi*2.0/3.0, arctan-angle+2.0*Pi-4.0/3.0*Pi);
+      }
+      vec3 vColor2=vec3(fColor.r+r+0.1,fColor.g+g+0.1,fColor.b+b+0.1);
+
+
+
+      float diffuse = dot(fNormal,l);
+      vec3 ambient_color  = ambient_coeff  * color;
+      vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * light_color;
+      vec3 specular2 = specular_coeff * pow(max(0.0,dot(n,h2)),specular_exp) * light_color;
+
+      gl_FragColor = vec4(ambient_color+color*diffuse+specular_color+specular2+vColor2*0.2,1.0);
+      gl_FragColor = vec4(ambient_color+specular_color+specular2+vColor2*0.2,1.0);
     }
   </script>
 
@@ -60,18 +129,17 @@
     var m4 = twgl.m4;
 
     var slider1 = document.getElementById('slider1');     //value for rotation around Z axis
-    slider1.value = -10;
+    slider1.value = 7;
     var slider2 = document.getElementById('slider2');     //speed
     slider2.value = 2;
     var slider3 = document.getElementById('slider3');     //vertical vision level
     slider3.value = 100;
     var slider4 = document.getElementById('slider4');     //skeleton density
-    slider4.value = 20;
+    slider4.value = 13;
     var slider5 = document.getElementById('slider5');     //number of object
     slider5.value = 3;
     var bool1 = document.getElementById('bool1');         //turn off motion 1
     var bool2 = document.getElementById('bool2');         //turn off motion 2
-    var bool3 = document.getElementById('bool3');         //hide axes
     var persp = true;                                     //boolean for toggle between ortho/persp
     var fill = true;                                      //boolean for toggle between fill/stroke
     var axis1 = [1,0,0];                                  // x axis
@@ -94,59 +162,112 @@
     if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
       alert(gl.getShaderInfoLog(fragmentShader)); return null; }
 
-    // Attach the shaders and link
     var shaderProgram = gl.createProgram();
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-      alert("Could not initialize shaders"); }
+      alert("err"); return;}
+    gl.validateProgram(shaderProgram);
     gl.useProgram(shaderProgram);
 
-    // with the vertex shader, we need to pass it positions
-    // as an attribute - so set up that communication
     shaderProgram.PositionAttribute = gl.getAttribLocation(shaderProgram, "vPosition");
     gl.enableVertexAttribArray(shaderProgram.PositionAttribute);
 
     shaderProgram.ColorAttribute = gl.getAttribLocation(shaderProgram, "vColor");
     gl.enableVertexAttribArray(shaderProgram.ColorAttribute);
 
-    // this gives us access to the matrix uniform
+    shaderProgram.NormalAttribute = gl.getAttribLocation(shaderProgram, "vNormal");
+	  gl.enableVertexAttribArray(shaderProgram.NormalAttribute);
+
     shaderProgram.MVPmatrix = gl.getUniformLocation(shaderProgram,"uMVP");
 
-    // Data ...
+    var vertexColors;
+    var vertexPos;
+    var vertexNormals;
+    function setup(){
+      var n = document.getElementById("slider4").value;   //density
+      var turnVert = !bool1.checked;                      //motion 1
+      var turnHori = !bool2.checked;                      //motion 2
+      var numberOO = slider5.value;                       //number of object
 
-    // vertex positions
-    var vertexPos = new Float32Array ();
+      var pArray = drawShape(200,100,ag,n,turnVert,turnHori,numberOO,m4.identity());
+      vertexPos = new Float32Array (pArray);
 
-    // vertex colors
-    var vertexColors = new Float32Array ([
-        1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,
-        0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,
-        1.0, 1.0, 0.0,   1.0, 1.0, 0.0,   1.0, 1.0, 0.0 ]);
+      vertexColors = new Float32Array (vertexPos.length);
+      for(var i = 0 ; i<vertexPos.length; i ++){
+        vertexColors[i]=Math.max(0.0,0.5*vertexPos[i]/200);
+      }
 
-    var vertexMat4;
+      vertexNormals = new Float32Array (vertexPos.length);
+      for(var i = 0 ; i<vertexPos.length; i ++){
+        if(i%9==0){
+          var x1=vertexPos[i];
+          var x2=vertexPos[i+3];
+          var x3=vertexPos[i+6];
+
+          var y1=vertexPos[i+1];
+          var y2=vertexPos[i+4];
+          var y3=vertexPos[i+7];
+
+          var z1=vertexPos[i+2];
+          var z2=vertexPos[i+5];
+          var z3=vertexPos[i+8];
+
+          var vec1 = new Float32Array([x1-x2,y1-y2,z1-z2])
+          var vec2 = new Float32Array([x1-x3,y1-y3,z1-z3]);
+          var vecN = twgl.v3.normalize(twgl.v3.cross(vec1,vec2));
+          if(i%2==0){
+            vecN[0]=-vecN[0];
+            vecN[1]=-vecN[1];
+            vecN[2]=-vecN[2];
+          }
+          for(var j=0;j<3;j++){
+            if(j%3==0){
+              vertexNormals[i+j]=vecN[0];
+              vertexNormals[i+j+3]=vecN[0];
+              vertexNormals[i+j+6]=vecN[0];
+            }
+            else if(j%3==1){
+              vertexNormals[i+j]=vecN[1];
+              vertexNormals[i+j+3]=vecN[1];
+              vertexNormals[i+j+6]=vecN[1];
+            }
+            else{
+              vertexNormals[i+j]=vecN[2];
+              vertexNormals[i+j+3]=vecN[2];
+              vertexNormals[i+j+6]=vecN[2];
+            }
+          }
+        }
+      }
+    }
+    setup();
+
     // we need to put the vertices into a buffer so we can
     // block transfer them to the graphics hardware
     var trianglePosBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, trianglePosBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, vertexPos, gl.STATIC_DRAW);
     trianglePosBuffer.itemSize = 3;
-    trianglePosBuffer.numItems = vertexPos.length;
+    trianglePosBuffer.numItems = vertexPos.length/3;
 
     // a buffer for colors
     var colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, vertexColors, gl.STATIC_DRAW);
     colorBuffer.itemSize = 3;
-    colorBuffer.numItems = 12;
+    colorBuffer.numItems = vertexPos.length/3;
+
+    var normalBuffer = gl.createBuffer();
+  	gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+  	gl.bufferData(gl.ARRAY_BUFFER, vertexNormals, gl.STATIC_DRAW);
+  	normalBuffer.itemSize = 3;
+  	normalBuffer.numItems = vertexPos.length/3;
 
     // draw horizontal skeleton (horizontal circle)
-    function setUpTriangles(r1,r2,ag1,ag2,Tx,angleD,Tmodel){
+    function setUpTriangles(r1,r2,ag1,ag2,angleD,Tmodel){
       var pSet = [];
-      moveToTx(r1-Math.cos(ag1)*r2,0,r2*Math.sin(ag1),Tx);
-      var tempTri = [];
       for(var j=angleD;j<2.001*Math.PI;j+=angleD){
         var x = (r1-Math.cos(ag1)*r2)*Math.cos(j+ag2);
         var y = (r1-Math.cos(ag1)*r2)*Math.sin(j+ag2);
@@ -156,7 +277,7 @@
       return pSet;
     }
     //calculating all the points
-    function drawShape(r1,r2,ag,Tx,n,turnVert,turnHori,count,Tmodel){
+    function drawShape(r1,r2,ag,n,turnVert,turnHori,count,Tmodel){
       count--;
       ag =- ag;
       var angleD = Math.PI*2/n;   // full circle / density
@@ -176,9 +297,10 @@
         else{
           ag2 = 0;
         }
-        pSets[i] = setUpTriangles(r1,r2,(ag1+i*angleD),ag2,Tx,angleD,Tmodel);
+        pSets[i] = setUpTriangles(r1,r2,(ag1+i*angleD),ag2,angleD,Tmodel);
       }
       // setup triangles
+      var pArray = [];
       for(var i = 0; i < pSets.length; i++){
         var pSet1 = pSets[i];
         var iPlus1 = i + 1;
@@ -191,53 +313,53 @@
           if(jPlus1 >= pSet1.length){
             jPlus1 = 0;
           }
-          point1_1 = pSet1[j];
-          point1_2 = pSet1[jPlus1];
-          point1_3 = pSet2[j];
+          var point1_1 = pSet1[j];
+          var point1_2 = pSet1[jPlus1];
+          var point1_3 = pSet2[j];
 
-          point2_1 = pSet2[j];
-          point2_2 = pSet2[jPlus1];
-          point2_3 = pSet1[jPlus1];
-          vertexPos.push(point1_1.x);
-          vertexPos.push(point1_1.y);
-          vertexPos.push(point1_1.z);
-          vertexPos.push(point1_2.x);
-          vertexPos.push(point1_2.y);
-          vertexPos.push(point1_2.z);
-          vertexPos.push(point1_3.x);
-          vertexPos.push(point1_3.y);
-          vertexPos.push(point1_3.z);
-          vertexPos.push(point2_1.x);
-          vertexPos.push(point2_1.y);
-          vertexPos.push(point2_1.z);
-          vertexPos.push(point2_2.x);
-          vertexPos.push(point2_2.y);
-          vertexPos.push(point2_2.z);
-          vertexPos.push(point2_3.x);
-          vertexPos.push(point2_3.y);
-          vertexPos.push(point2_3.z);
-          vertexMat4.push(Tx);
-          vertexMat4.push(Tx);
+          var point2_1 = pSet2[j];
+          var point2_2 = pSet2[jPlus1];
+          var point2_3 = pSet1[jPlus1];
+          pArray.push(point1_1[0]);
+          pArray.push(point1_1[1]);
+          pArray.push(point1_1[2]);
+
+          pArray.push(point1_2[0]);
+          pArray.push(point1_2[1]);
+          pArray.push(point1_2[2]);
+
+          pArray.push(point1_3[0]);
+          pArray.push(point1_3[1]);
+          pArray.push(point1_3[2]);
+
+          pArray.push(point2_1[0]);
+          pArray.push(point2_1[1]);
+          pArray.push(point2_1[2]);
+
+          pArray.push(point2_2[0]);
+          pArray.push(point2_2[1]);
+          pArray.push(point2_2[2]);
+
+          pArray.push(point2_3[0]);
+          pArray.push(point2_3[1]);
+          pArray.push(point2_3[2]);
         }
       }
       //draw smaller object by recursion
-      // if(count>0){
-      //   var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tmodel);
-      //   Tmodel = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
-      //   drawShape(r1,r2,3*ag,Tx,n,turnVert,turnHori,count,Tmodel);
-      // }
+      if(count>0){
+        var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tmodel);
+        Tmodel = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
+        pArray = pArray.concat(drawShape(r1,r2,2*ag,n,turnVert,turnHori,count,Tmodel));
+      }
+      return pArray;
     }
 
     // Scene (re-)draw routine
     function draw() {
-
-      var n = document.getElementById("slider4").value;   //density
+      setup();
+      var a = vertexPos;
       var angle1 = slider1.value*0.02*Math.PI;            //rotation angle
       var level = (slider3.value-100)*0.005*Math.PI;      //vision level
-      var turnVert = !bool1.checked;                      //motion 1
-      var turnHori = !bool2.checked;                      //motion 2
-      var HideAxes = bool3.checked;                       //hide axis
-      var numberOO = slider5.value;                       //number of object
 
       var eye = [800,800,800*Math.cos(level)];
       var target = [0,0,0];
@@ -249,7 +371,7 @@
 
       //toggle feature
       if(persp){
-        Tprojection=m4.perspective(Math.PI/8,1,3,400);
+        Tprojection=m4.perspective(Math.PI/4,1,4,10000);
       }
       else {
         Tprojection=m4.ortho(-250,250,-200,300,-2,2);
@@ -257,13 +379,12 @@
 
       var Tmvp=m4.multiply(m4.multiply(Tmodel,Tcamera),Tprojection);
 
-        // Clear screen, prepare for rendering
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        // Set up uniforms & attributes
-        gl.uniformMatrix4fv(shaderProgram.MVPmatrix,false,tMVP);
+
+        gl.uniformMatrix4fv(shaderProgram.MVPmatrix,false,Tmvp);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
         gl.vertexAttribPointer(shaderProgram.ColorAttribute, colorBuffer.itemSize,
@@ -271,8 +392,11 @@
         gl.bindBuffer(gl.ARRAY_BUFFER, trianglePosBuffer);
         gl.vertexAttribPointer(shaderProgram.PositionAttribute, trianglePosBuffer.itemSize,
           gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.vertexAttribPointer(shaderProgram.NormalAttribute, normalBuffer.itemSize,
+          gl.FLOAT, false, 0, 0);
 
-	    // Do the drawing
+
         gl.drawArrays(gl.TRIANGLES, 0, trianglePosBuffer.numItems);
         update();
         window.requestAnimationFrame(draw);
@@ -280,6 +404,23 @@
       //update for animation
       function update(){
         ag = (ag + Math.PI/320*slider2.value) % (Math.PI*2);  //change in angle for animation (scale with speed)
+        trianglePosBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglePosBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertexPos, gl.STATIC_DRAW);
+        trianglePosBuffer.itemSize = 3;
+        trianglePosBuffer.numItems = vertexPos.length/3;
+
+        colorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertexColors, gl.STATIC_DRAW);
+        colorBuffer.itemSize = 3;
+        colorBuffer.numItems = vertexPos.length/3;
+
+        normalBuffer = gl.createBuffer();
+      	gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+      	gl.bufferData(gl.ARRAY_BUFFER, vertexNormals, gl.STATIC_DRAW);
+      	normalBuffer.itemSize = 3;
+      	normalBuffer.numItems = vertexPos.length/3;
       }
       function toggle(){
         persp = !persp;
@@ -287,5 +428,6 @@
       function toggleFS(){
         fill = !fill;
       }
+      draw();
     }
   </script>

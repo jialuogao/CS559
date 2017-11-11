@@ -87,7 +87,7 @@
   // draw horizontal skeleton (horizontal circle)
   function setUpTriangles(r1,r2,ag1,ag2,Tx,angleD,Tmodel){
     var pSet = [];
-    moveToTx(r1-Math.cos(ag1)*r2,0,r2*Math.sin(ag1),Tx);
+    //moveToTx(r1-Math.cos(ag1)*r2,0,r2*Math.sin(ag1),Tx);
     var tempTri = [];
     for(var j=angleD;j<2.001*Math.PI;j+=angleD){
       var x = (r1-Math.cos(ag1)*r2)*Math.cos(j+ag2);
