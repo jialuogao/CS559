@@ -252,10 +252,12 @@ window.onload = function() {
                 if(obj.drawAfter) obj.drawAfter();
             });
         }
-        var value = Number(sliders.TimeOfDay.value)
-        sliders.TimeOfDay.value = value+Number(sliders.TimeOfDay.step);
-        if(value >= Number(sliders.TimeOfDay.max)){
-          sliders.TimeOfDay.value = 0;
+        if (checkboxes.Run.checked) {
+          var value = Number(sliders.TimeOfDay.value)
+          sliders.TimeOfDay.value = value+Number(sliders.TimeOfDay.step);
+          if(value >= Number(sliders.TimeOfDay.max)){
+            sliders.TimeOfDay.value = 0;
+          }
         }
         window.requestAnimationFrame(draw);
     };
