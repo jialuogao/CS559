@@ -127,6 +127,7 @@ window.onload = function() {
 
     // the actual draw function - which is the main "loop"
     function draw() {
+
         // advance the clock appropriately (unless its stopped)
         var curTime = Date.now();
         if (checkboxes.Run.checked) {
@@ -204,11 +205,7 @@ window.onload = function() {
         var tod = Number(sliders.TimeOfDay.value);
         var sunAngle = Math.PI* (tod-6)/12;
         var sunDirection = [Math.cos(sunAngle),Math.sin(sunAngle),Math.sin(sunAngle)*0.2];
-        var sunColor;
-        //if(sunAngle>0 && sunAngle<Math.PI){
-          sunColor = [1.0,Math.pow(Math.sin(sunAngle),2.0)+1/3,Math.pow(Math.sin(sunAngle),2)];
-      //  }
-        //else sunColor=[0,0,0];
+        var sunColor = [1.0,Math.pow(Math.sin(sunAngle),2.0)+1/3,Math.pow(Math.sin(sunAngle),2)];
         // make a real drawing state for drawing
         var drawingState = {
             gl : gl,

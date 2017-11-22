@@ -54,31 +54,32 @@ an example of a more complex/richer behavior.
 
         // create the shaders once - for all cubes
         if (!shaderProgram) {
-            shaderProgram = twgl.createProgramInfo(gl, ["cube-vs", "cube-fs"]);
+            shaderProgram = twgl.createProgramInfo(gl, ["building-vs", "building-fs"]);
         }
+        //NOTE: I found This model from the internet
         if (!copterBodyBuffers) {
-            var arrays = {
-                vpos : { numComponents: 3, data: [
-                    .5, 0, 0,  0,0,.5,  -.5,0,0,  0,0, -.5, 0,.5,0,    0, -.5,0,
-                    q,0,-q,  0,q,-q,  -q,0,-q,  0,-q,-q,  0,0,-1
-                ] },
-                vnormal : {numComponents:3, data: [
-                    1,0,0,  0,0,1,  -1,0,0,  0,0,-1, 0,1,0,  0,-1,0,
-                    1,0,0,  0,1,0,  -1,0,0,  0,-1,0,  0,0,-1
-                ]},
-                indices : [0,1,4, 1,2,4, 2,3,4, 3,0,4, 1,0,5, 2,1,5, 3,2,5, 0,3,5,
-                           6,7,10, 7,8,10, 8,9,10, 9,6,10
-                            ]
-            };
-            copterBodyBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,arrays);
+          var vPosition = fuselageVertex.concat(
+                          door1Vertex.concat(
+                          door2Vertex.concat(
+                          door3Vertex.concat(
+                          door4Vertex.concat(door5Vertex)))));
+          var vNormal = fuselageNormal.concat(
+                        door1Normal.concat(
+                        door2Normal.concat(
+                        door3Normal.concat(
+                        door4Normal.concat(door5Normal)))));
 
-            var rarrays = {
-                vpos : {numcomponents:3, data: [0,.5,0, 1,.5,.1, 1,.5, -.1,
-                                                0,.5,0, -1,.5,.1, -1,.5, -.1]},
-                vnormal : {numcomponents:3, data: [0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,1,0]},
-                indices : [0,1,2, 3,4,5]
-            };
-            copterRotorBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,rarrays);
+          var arrays = {
+            vPosition : {numComponents: 3, data: vPosition},
+            vNormal : {numComponents:3, data: vNormal},
+          };
+          copterBodyBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,arrays);
+
+          var rarrays = {
+              vPosition : {numcomponents:3, data: main_rotorVertex},
+              vNormal : {numcomponents:3, data: main_rotorNormal},
+          };
+          copterRotorBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,rarrays);
         }
         // put the helicopter on a random helipad
         // see the stuff on helicopter behavior to understand the thing
@@ -93,18 +94,25 @@ an example of a more complex/richer behavior.
         // make the helicopter fly around
         // this will change position and orientation
         advance(this,drawingState);
-
+        var m4=twgl.m4;
         // we make a model matrix to place the cube in the world
-        var modelM = twgl.m4.rotationY(this.orientation);
+        var modelM = m4.multiply(m4.rotationY(this.orientation),m4.rotationY(Math.PI));
+        modelM = m4.multiply(m4.scaling([0.2,0.2,0.2]),modelM);
+        modelM = m4.multiply(m4.rotationX(-Math.PI/2),modelM);
         twgl.m4.setTranslation(modelM,this.position,modelM);
         // the drawing coce is straightforward - since twgl deals with the GL stuff for us
         var gl = drawingState.gl;
         gl.useProgram(shaderProgram.program);
         twgl.setUniforms(shaderProgram,{
-            view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-            cubecolor:this.color, model: modelM });
+          view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
+          lightColor:drawingState.sunColor, model: modelM, objColor: this.color});
         twgl.setBuffersAndAttributes(gl,shaderProgram,copterBodyBuffers);
         twgl.drawBufferInfo(gl, gl.TRIANGLES, copterBodyBuffers);
+
+        modelM = m4.multiply(m4.rotationZ(drawingState.realtime/30.0),modelM);
+        twgl.setUniforms(shaderProgram,{
+          view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
+          cubecolor:this.color, model: modelM});
         twgl.setBuffersAndAttributes(gl,shaderProgram,copterRotorBuffers);
         twgl.drawBufferInfo(gl, gl.TRIANGLES, copterRotorBuffers);
     };
@@ -121,6 +129,7 @@ an example of a more complex/richer behavior.
         this.size = 1.0;
         // yes, there is probably a better way
         this.helipad = true;
+        this.color = [1.0,1.0,0.0]
         // what altitude should the helicopter be?
         // this get added to the helicopter size
         this.helipadAltitude = 0;
@@ -131,11 +140,11 @@ an example of a more complex/richer behavior.
 
         // create the shaders once - for all cubes
         if (!shaderProgram) {
-            shaderProgram = twgl.createProgramInfo(gl, ["cube-vs", "cube-fs"]);
+            shaderProgram = twgl.createProgramInfo(gl, ["building-vs", "building-fs"]);
         }
         if (!padBuffers) {
             var arrays = {
-                vpos : { numComponents: 3, data: [
+                vPosition : { numComponents: 3, data: [
                     -1,0,-1, -1,0,1, -.5,0,1, -.5,0,-1,
                     1,0,-1, 1,0,1, .5,0,1, .5,0,-1,
                     -.5,0,-.25, -.5,0,.25,.5,0,.25,.5,0, -.25
@@ -161,8 +170,8 @@ an example of a more complex/richer behavior.
         var gl = drawingState.gl;
         gl.useProgram(shaderProgram.program);
         twgl.setUniforms(shaderProgram,{
-            view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-            cubecolor:[1,1,0], model: modelM });
+          view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
+          lightColor:drawingState.sunColor, model: modelM, objColor: this.color});
         twgl.setBuffersAndAttributes(gl,shaderProgram,padBuffers);
         twgl.drawBufferInfo(gl, gl.TRIANGLES, padBuffers);
     };
