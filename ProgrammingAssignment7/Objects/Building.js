@@ -11,7 +11,7 @@ var Building = undefined;
     this.name = "CCTV Headquarters";
     this.position = position || [1.5,1.5,2.0];
     this.size = size || 1.0;
-    this.color = color || [0.3,0.3,1.0];
+    this.color = color || [0.4,0.9,1.0];
   }
   Building.prototype.init = function(drawingState){
     var gl = drawingState.gl;

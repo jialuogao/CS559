@@ -79,7 +79,7 @@ window.onload = function() {
     controls.appendChild(toExamine);
 
     // make some sliders - using my cheesy panels code
-    var sliders = makeSliders([["TimeOfDay",0,24,12]]);
+    var sliders = makeSliders([["TimeOfDay",0,24,6,0.05]]);
 
     // this could be gl = canvas.getContext("webgl");
     // but twgl is more robust
@@ -204,8 +204,11 @@ window.onload = function() {
         var tod = Number(sliders.TimeOfDay.value);
         var sunAngle = Math.PI* (tod-6)/12;
         var sunDirection = [Math.cos(sunAngle),Math.sin(sunAngle),Math.sin(sunAngle)*0.2];
-        var sunColor = [1.0,Math.cos(sunAngle),Math.sqrt(Math.cos(sunAngle))];
-        sunColor = [1,1,1];
+        var sunColor;
+        //if(sunAngle>0 && sunAngle<Math.PI){
+          sunColor = [1.0,Math.pow(Math.sin(sunAngle),2.0)+1/3,Math.pow(Math.sin(sunAngle),2)];
+      //  }
+        //else sunColor=[0,0,0];
         // make a real drawing state for drawing
         var drawingState = {
             gl : gl,
@@ -248,6 +251,11 @@ window.onload = function() {
             grobjects.forEach(function (obj) {
                 if(obj.drawAfter) obj.drawAfter();
             });
+        }
+        var value = Number(sliders.TimeOfDay.value)
+        sliders.TimeOfDay.value = value+Number(sliders.TimeOfDay.step);
+        if(value >= Number(sliders.TimeOfDay.max)){
+          sliders.TimeOfDay.value = 0;
         }
         window.requestAnimationFrame(draw);
     };

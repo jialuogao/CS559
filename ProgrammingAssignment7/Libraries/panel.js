@@ -59,7 +59,7 @@ function makeSliders(names, callback, perRow) {
 
     names.forEach(function(b,i) {
         "use strict";
-        var bname,bmin,bmax,bval;
+        var bname,bmin,bmax,bval,bstep;
 
         if (typeof(b) === "string") {
             bname = b;
@@ -71,6 +71,7 @@ function makeSliders(names, callback, perRow) {
             bmin = b.length ? b[1] : 0;
             bmax = b.length ? b[2] : 10;
             bval = b.length ? b[3] : 5;
+            bstep = b.length ? b[4] : 1;
         }
 
         if (i && (i%perRow===0))
@@ -83,7 +84,7 @@ function makeSliders(names, callback, perRow) {
 
         span.style.width = '300px';
         span.style.display = "inline-block";
-
+        button.step = bstep;
         button.id = bname;
         button.setAttribute("type", "range");
         button.width = 200;
@@ -166,4 +167,3 @@ function addBR() {
     var panel = setupPanel();
     panel.appendChild(document.createElement("BR"));
 }
-
