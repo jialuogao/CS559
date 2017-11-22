@@ -96,7 +96,7 @@ var Building = undefined;
         vPosition : { numComponents: 3, data: pos },
         vNormal : { numComponents: 3, data: norms }
       };
-      buffers = twgl.createBufferInfoFromArrays(drawingState.gl,arrays);
+      buffers = twgl.createBufferInfoFromArrays(gl,arrays);
     }
   };
 
@@ -116,4 +116,4 @@ var Building = undefined;
   }
 })();
 
-grobjects.push(new Building([0,0.02,0],1.0));
+grobjects.push(new Building([-1.5,0.02,-1.5],1.0));

@@ -29,7 +29,7 @@ var groundPlaneSize = groundPlaneSize || 5;
     "use strict";
 
     // putting the arrays of object info here as well
-    var vertexPos = [
+    var pos = [
         -groundPlaneSize, 0, -groundPlaneSize,
          groundPlaneSize, 0, -groundPlaneSize,
          groundPlaneSize, 0,  groundPlaneSize,
@@ -61,9 +61,25 @@ var groundPlaneSize = groundPlaneSize || 5;
             // an abbreviation...
             var gl = drawingState.gl;
             if (!shaderProgram) {
-                shaderProgram = twgl.createProgramInfo(gl,["ground-vs","ground-fs"]);
+                //shaderProgram = twgl.createProgramInfo(gl,["ground-vs","ground-fs"]);                shaderProgram = twgl.createProgramInfo(gl,["ground-vs","ground-fs"]);
+                shaderProgram = twgl.createProgramInfo(gl,["building-vs","building-fs"]);
             }
-            var arrays = { vpos : {numComponents:3, data:vertexPos }};
+            var norms = [];
+            var v1 = new Float32Array([pos[0]-pos[3],pos[1]-pos[4],pos[2]-pos[5]]);
+            var v2 = new Float32Array([pos[0]-pos[6],pos[1]-pos[7],pos[2]-pos[8]]);
+            var n = twgl.v3.normalize(twgl.v3.cross(v1,v2));
+            n[0]=-n[0];
+            n[1]=-n[1];
+            n[2]=-n[2];
+            for(var j = 0; j<pos.length ; j+=3){
+                norms.push(n[0]);
+                norms.push(n[1]);
+                norms.push(n[2]);
+            }
+            var arrays = {
+              vPosition : { numComponents: 3, data: pos },
+              vNormal : { numComponents: 3, data: norms }
+            };
             buffers = twgl.createBufferInfoFromArrays(gl,arrays);
        },
         draw : function(drawingState) {
@@ -71,8 +87,8 @@ var groundPlaneSize = groundPlaneSize || 5;
             gl.useProgram(shaderProgram.program);
             twgl.setBuffersAndAttributes(gl,shaderProgram,buffers);
             twgl.setUniforms(shaderProgram,{
-                view:drawingState.view, proj:drawingState.proj
-            });
+              view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
+              lightColor:drawingState.sunColor, model: twgl.m4.identity(), objColor: [1,1,1]});
             twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
         },
         center : function(drawingState) {
