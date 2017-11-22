@@ -44,7 +44,7 @@ an example of a more complex/richer behavior.
     Copter = function Copter(name) {
         this.name = "copter"+copterNumber++;
         this.position = [0,0,0];    // will be set in init
-        this.color = [.9,.3,.4];
+        this.color = [1,1,1];
         // about the Y axis - it's the facing direction
         this.orientation = 0;
     }
@@ -97,7 +97,7 @@ an example of a more complex/richer behavior.
         var m4=twgl.m4;
         // we make a model matrix to place the cube in the world
         var modelM = m4.multiply(m4.rotationY(this.orientation),m4.rotationY(Math.PI));
-        modelM = m4.multiply(m4.scaling([0.2,0.2,0.2]),modelM);
+        modelM = m4.multiply(m4.scaling([0.3,0.3,0.3]),modelM);
         modelM = m4.multiply(m4.rotationX(-Math.PI/2),modelM);
         twgl.m4.setTranslation(modelM,this.position,modelM);
         // the drawing coce is straightforward - since twgl deals with the GL stuff for us
@@ -129,7 +129,7 @@ an example of a more complex/richer behavior.
         this.size = 1.0;
         // yes, there is probably a better way
         this.helipad = true;
-        this.color = [1.0,1.0,0.0]
+        this.color = [1.0,1.0,0.0];
         // what altitude should the helicopter be?
         // this get added to the helicopter size
         this.helipadAltitude = 0;
@@ -206,7 +206,7 @@ an example of a more complex/richer behavior.
 
     ////////////////////////
     // constants
-    var altitude = 3;
+    var altitude = 5;
     var verticalSpeed = 3 / 1000;      // units per milli-second
     var flyingSpeed = 3/1000;          // units per milli-second
     var turningSpeed = 2/1000;         // radians per milli-second
@@ -297,8 +297,8 @@ an example of a more complex/richer behavior.
                 }
                 break;
             case 4: // land at goal
-                var destAlt = heli.lastPad.position[1] + .5 + heli.lastPad.helipadAltitude;
-                if (heli.position[1] > destAlt) {
+                var destAlt = heli.lastPad.position[1] + 0.52 + heli.lastPad.helipadAltitude;
+                if (heli.position[1] > destAlt  && Math.abs(heli.position[1]-destAlt)>=0.0001) {
                     var down = delta * verticalSpeed;
                     heli.position[1] = Math.max(destAlt,heli.position[1]-down);
                 } else { // on the ground!
