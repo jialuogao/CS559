@@ -79,7 +79,7 @@ window.onload = function() {
     controls.appendChild(toExamine);
 
     // make some sliders - using my cheesy panels code
-    var sliders = makeSliders([["TimeOfDay",0,24,6,0.03]]);
+    var sliders = makeSliders([["TimeOfDay",0,24,0,0.02]]);
 
     // this could be gl = canvas.getContext("webgl");
     // but twgl is more robust
