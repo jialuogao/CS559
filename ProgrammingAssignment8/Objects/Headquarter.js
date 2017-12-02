@@ -186,4 +186,4 @@ var Headquarter = undefined;
   }
 })();
 
-grobjects.push(new Headquarter([10,0.02,10],5.0));
+grobjects.push(new Headquarter([-20,0.02,-25],5.0));

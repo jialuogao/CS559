@@ -21,22 +21,22 @@ var Watercube = undefined;
       var pos = [
         //bot
         177,0,177,    177,0,-177,   -177,0,-177,
-        177,0,177,    -177,0,177,   -177,0,-177,
+        177,0,177,    -177,0,-177,  -177,0,177,
         //top
         177,60,177,   177,60,-177,  -177,60,-177,
-        177,60,177,   -177,60,177,  -177,60,-177,
+        177,60,177,   -177,60,-177, -177,60,177,
         //back
         -177,60,-177, 177,60,-177,  177,0,-177,
-        -177,60,-177, -177,0,-177,  177,0,-177,
+        -177,60,-177, 177,0,-177,   -177,0,-177,
         //left
         177,60,-177,  177,60,177,   177,0,177,
-        177,60,-177,  177,0,-177,   177,0,177,
+        177,60,-177,  177,0,177,    177,0,-177,
         //front
-        177,60,177,   -177,60,177,  -177,0,-177,
-        177,60,177,   177,60,177,   -177,0,-177,
+        177,60,177,   -177,60,177,  -177,0,177,
+        177,60,177,   -177,0,177,   177,0,177,
         //right
         -177,60,177,  -177,60,-177, -177,0,-177,
-        -177,60,177,  -177,0,177,   -177,0,-177,
+        -177,60,177,  -177,0,-177,  -177,0,177,
       ];
       var norms = [];
       for(var i = 0; i<pos.length; i+=18){
@@ -61,20 +61,20 @@ var Watercube = undefined;
         0,0, 0,0, 0,0,
         0,0, 0,0, 0,0,
         //top x z
-        0.77,0.77,  0.77,-0.77,  -0.77,-0.77,
-        0.77,0.77,  -0.77,0.77,  -0.77,-0.77,
-        //front x y
-        0.77,0.3,  -0.77,0.3,  -0.77,0,
-        0.77,0.3,  0.77,0.3,   -0.77,0,
-        //right y z
-        0.3,0.77, 0.3,-0.77, 0,-0.77,
-        0.3,0.77, 0,0.77,    0,-0.77,
+        0.8734,0.8734, 0.8734,0.1266, 0.1266,0.1266,
+        0.8734,0.8734, 0.1266,0.1266, 0.1266,0.8734,
         //back x y
-        -0.77,-0.77,  0.77,-0.77,  0.77,-0.77,
-        -0.77,-0.77,  -0.77,-0.77,  0.77,-0.77,
+        0.1266,0.1266, 0.8734,0.1266,  0.8734,0,
+        0.1266,0.1266, 0.8734,0,       0.1266,0,
         //left y z
-        0.3,-0.77, 0.3,0.77,   0,0.77,
-        0.3,-0.77, 0,-0.77,   0,0.77,
+        0.8734,0.1266, 0.8734,0.8734,  1,0.8734,
+        0.8734,0.1266, 1,0.8734,       1,0.1266,
+        //front x y
+        0.8734,0.8734, 0.1266,0.8734, 0.1266,1,
+        0.8734,0.8734, 0.1266,1,      0.8734,1,
+        //right y z
+        0.1266,0.8734, 0.1266,0.1266, 0,0.1266,
+        0.1266,0.8734, 0,0.1266,      0,0.8734,
       ];
       var arrays = {
         vPosition : { numComponents: 3, data: pos },
@@ -84,8 +84,9 @@ var Watercube = undefined;
       buffers = twgl.createBufferInfoFromArrays(gl,arrays);
       gl.useProgram(shaderProgram.program);
       shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
-      gl.uniform1i(shaderProgram.program.uTexture, 0);
+      gl.uniform1i(shaderProgram.program.uTexture, 2);
       var texture = gl.createTexture();
+    	gl.activeTexture(gl.TEXTURE2);
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       initTextureThenDraw(gl,texture);
@@ -123,8 +124,8 @@ var Watercube = undefined;
       LoadTexture(gl,texture);
     }
 
-  	window.setTimeout(console.log("TIMEOUT"), 500);
+  	window.setTimeout(console.log("TIMEOUT"), 5000);
   }
 })();
 
-grobjects.push(new Watercube([10,0.02,-10],10.0));
+grobjects.push(new Watercube([20,0.02,20],4.0));

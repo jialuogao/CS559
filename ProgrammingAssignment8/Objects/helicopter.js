@@ -323,8 +323,8 @@ grobjects.push(new Helipad([-15,.01,15]));
 grobjects.push(new Helipad([-3,.01,3]));
 
 // just to show - if there's a cube, we can land on it
-var acube = findObj("cube1");
+var acube = findObj("Water Cube");
 if (acube) {
     acube.helipad = true;
-    acube.helipadAltitude = 0.5;
+    acube.helipadAltitude = 2.4;
 }

@@ -65,8 +65,9 @@ var Birdsnest = undefined;
       buffers = twgl.createBufferInfoFromArrays(gl,arrays);
       gl.useProgram(shaderProgram.program);
       shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
-      gl.uniform1i(shaderProgram.program.uTexture, 0);
+      gl.uniform1i(shaderProgram.program.uTexture, 1);
       var texture = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE1);
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       initTextureThenDraw(gl,texture);
@@ -109,4 +110,4 @@ var Birdsnest = undefined;
 })();
 
 
-grobjects.push(new Birdsnest([-15,0.02,-15],6.0));
+grobjects.push(new Birdsnest([15,0.02,-35],6.0));
