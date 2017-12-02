@@ -6,24 +6,24 @@ quad faces
 
 #### JavaScript .obj File Loader ####
 
-Provides two methods for loading .obj files into javascript. 
+Provides two methods for loading .obj files into javascript.
 
 
 Method 1) Ajax
 
 
-Method 2) Script Tag. 
+Method 2) Script Tag.
 
 
 Method 1 can fail when the webpage is not being hosted by a webserver. Method 2 solves this,
-but makes it unable to load models dynmaically. 
+but makes it unable to load models dynmaically.
 
 ##### Links #####
 [generator](http://graphics.cs.wisc.edu/Courses/559-f2015/Examples/OBJGenerator/generator.html)
 
 
 ### Usage 1 ###
-Download OBJLoader.js and include it on your page. 
+Download OBJLoader.js and include it on your page.
 
 ```html
 <script src="js/OBJLoader.js"></script>
@@ -48,13 +48,13 @@ OBJLoader.loadAll(["assets/Wolf.obj", "assets/Deer.obj"], function (models){
 
 ####Step 1####
 Generate Your .objs files. These are "javascriptified" versions of your .obj
-files that can be included directly into your webpage. 
+files that can be included directly into your webpage.
 [Go Here](http://graphics.cs.wisc.edu/Courses/559-f2015/Examples/OBJGenerator/generator.html) to generate them.
 
 There are some sample ones located in assets/objjs of the repository.
 
 #####Step 2####
-Include them on your page somewhere in the head like this 
+Include them on your page somewhere in the head like this
 ```html
   <script type="text/javascript" src="assets/Wolf.objjs"></script>
 ```
@@ -70,27 +70,27 @@ var Wolf = LoadedOBJFiles["wolf.obj"];
 var gWolf = Wolf.groups["wolf"];
 for(var i = 0;i < gWolf.faces.length;i++){
   var face = gWolf.faces[i];
-  console.log(face);//all the faces in wolf model!. 
+  console.log(face);//all the faces in wolf model!.
 }
 ```
 
 ####Model Format####
 
 ```html
-{ 
+{
 
-	vertices :  [ [x, y, z] ... ], //all vertices in file, 
+	vertices :  [ [x, y, z] ... ], //all vertices in file,
 	texCoords:  [ [u, v, w] ... ], // all coords in file  
-	normals  :  [ [x, y, z] ... ], //all normals in file 
+	normals  :  [ [x, y, z] ... ], //all normals in file
 
-	groups : { // .obj files can contain more than one model. 
+	groups : { // .obj files can contain more than one model.
 
 		groupname : {
 
 			vertices : reference to original vertices,
 			texCoords : reference to original tex coords,
 			normals : reference to original normals,
-			faces : [ 
+			faces : [
 			     [
 			       [vertexIndex, texCoordIndex, normalIndex], //vertex 1
 			       [vertexIndex, texCoordIndex, normalIndex], //vertex 2
@@ -105,7 +105,7 @@ for(var i = 0;i < gWolf.faces.length;i++){
 
 }
 ```
- 
+
 ####Average Vertex Example#####
 ```javascript
 var group = LoadedOBJFiles["cube.obj"].groups["cube"];
@@ -123,7 +123,7 @@ for(var i = 0;i<faces.length;i++){   //for each face
         }
         c++;
     }
-     
+
 }
 
 sum[0] /= c;
@@ -131,6 +131,3 @@ sum[1] /= c;
 sum[2] /= c;
 console.log(sum)
 ```
-
-
-

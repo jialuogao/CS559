@@ -14,12 +14,11 @@
 <script src="Libraries/arcball.js"></script>
 <script src="grobject.js"></script>
 <script src="Objects/ground.js"></script>
-
 <!-- This is where we load the objects for the world -->
-<script src="Objects/Flag.js"></script>
-<script src="Objects/Building.js"></script>
-<script src="Objects/birdnet.objjs"></script>
-<script src="Objects/Birdnet.js"></script>
+<script src="Objects/Headquarter.js"></script>
+<script src="Objects/Birdsnest.objjs"></script>
+<script src="Objects/Birdsnest.js"></script>
+<script src="Objects/Watercube.js"></script>
 <!-- I am adding the helicopter -->
 <script src="Objects/helicopter.js"></script>
 <script src="Objects/helicopterMesh.js"></script>
@@ -32,7 +31,7 @@
   -- that's the only way I know to load them without either
   -- sticking them in JavaScript strings, or using a web server
   -->
-<script id="building-vs" type="notjs">
+<script id="headquarter-vs" type="notjs">
   precision highp float;
   attribute vec3 vPosition;
   attribute vec3 vNormal;
@@ -61,7 +60,7 @@
       fTexCoord = vTexCorrd;
   }
 </script>
-<script id="building-fs" type="notjs">
+<script id="headquarter-fs" type="notjs">
     precision highp float;
     varying vec3 normal;
     varying vec3 dLight;
@@ -89,7 +88,7 @@
     void main(void) {
         vec4 vNormal = normalize(tModel * vec4(normal,0.0));
         float diffuse = .5*max(0.0,(dot(normalize(vNormal), vec4(normalize(dLight),0.0))));
-        vec3 l = normalize(dLight)*2.0;
+        vec3 l = normalize(dLight);
         vec3 n = normalize(vNormal.xyz);
         vec3 e = normalize(-pos);
         vec3 h = normalize(e+l);
@@ -140,7 +139,7 @@
     void main(void) {
         vec4 vNormal = normalize(tModel * vec4(normal,0.0));
         float diffuse = .5*max(0.0,(dot(normalize(vNormal), vec4(normalize(dLight),0.0))));
-        vec3 l = normalize(dLight)*2.0;
+        vec3 l = normalize(dLight);
         vec3 n = normalize(vNormal.xyz);
         vec3 e = normalize(-pos);
         vec3 h = normalize(e+l);
@@ -151,7 +150,7 @@
     }
 </script>
 
-<script id="birdnet-vs" type="notjs">
+<script id="birdsnest-vs" type="notjs">
   precision highp float;
   attribute vec3 vPosition;
   attribute vec3 vNormal;
@@ -177,7 +176,7 @@
       fTexCoord = vTexCorrd;
   }
 </script>
-<script id="birdnet-fs" type="notjs">
+<script id="birdsnest-fs" type="notjs">
     precision highp float;
     varying vec3 normal;
     varying vec3 dLight;
@@ -193,7 +192,7 @@
     void main(void) {
         vec4 vNormal = normalize(tModel * vec4(normal,0.0));
         float diffuse = .5*max(0.0,(dot(normalize(vNormal), vec4(normalize(dLight),0.0))));
-        vec3 l = normalize(dLight)*2.0;
+        vec3 l = normalize(dLight);
         vec3 n = normalize(vNormal.xyz);
         vec3 e = normalize(-pos);
         vec3 h = normalize(e+l);
@@ -201,7 +200,61 @@
         vec3 tcolor = textureColor.xyz;
         vec3 ambient_color = ambient_coeff * tcolor;
         vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * cLight;
-        gl_FragColor = vec4(ambient_color + specular_color + diffuse * (3.0*cLight+tcolor)/4.0, 1.0);
+        gl_FragColor = vec4(ambient_color + specular_color + diffuse * (cLight+tcolor)/2.0, 1.0);
+    }
+</script>
+
+<script id="watercube-vs" type="notjs">
+  precision highp float;
+  attribute vec3 vPosition;
+  attribute vec3 vNormal;
+  attribute vec2 vTexCorrd;
+  varying vec3 normal;
+  varying vec3 dLight;
+  varying vec3 cLight;
+  varying mat4 tModel;
+  varying vec3 pos;
+  varying vec2 fTexCoord;
+  uniform mat4 view;
+  uniform mat4 proj;
+  uniform mat4 model;
+  uniform vec3 lightdir;
+  uniform vec3 lightColor;
+  void main(void) {
+      pos = (view * model * vec4(vPosition, 1.0)).xyz;
+      gl_Position = proj * view * model * vec4(vPosition, 1.0);
+      normal = (view * model * vec4(vNormal,0.0)).xyz;
+      dLight = (view * model * vec4(lightdir,0.0)).xyz;
+      cLight = lightColor;
+      tModel = model;
+      fTexCoord = vTexCorrd;
+  }
+</script>
+<script id="watercube-fs" type="notjs">
+    precision highp float;
+    varying vec3 normal;
+    varying vec3 dLight;
+    varying vec3 cLight;
+    varying mat4 tModel;
+    varying vec3 pos;
+    varying vec2 fTexCoord;
+    uniform sampler2D uTexture;
+    const float ambient_coeff = 0.7;
+    const float specular_coeff  = 0.3;
+    const float specular_exp    = 100.0;
+
+    void main(void) {
+        vec4 vNormal = normalize(tModel * vec4(normal,0.0));
+        float diffuse = .5*max(0.0,(dot(normalize(vNormal), vec4(normalize(dLight),0.0))));
+        vec3 l = normalize(dLight);
+        vec3 n = normalize(vNormal.xyz);
+        vec3 e = normalize(-pos);
+        vec3 h = normalize(e+l);
+        vec4 textureColor = texture2D(uTexture,fTexCoord);
+        vec3 tcolor = textureColor.xyz;
+        vec3 ambient_color = ambient_coeff * tcolor;
+        vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * cLight;
+        gl_FragColor = vec4(ambient_color + specular_color + diffuse * (cLight+tcolor)/2.0, 1.0);
     }
 </script>
 
