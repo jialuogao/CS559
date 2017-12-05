@@ -351,37 +351,4 @@
     }
 </script>
 
-<!-- Special Ground Plane Shader - makes a boring
-  -- checkerboard
-  -->
-<script id="ground-vs" type="not-js">
-    precision highp float;
-
-    attribute vec3 vpos;
-    varying vec3 outPos;
-
-    uniform mat4 view;
-    uniform mat4 proj;
-
-    void main(void) {
-        gl_Position = proj * view * vec4(vpos, 1.0);
-        outPos = vpos;
-    }
-</script>
-<script id="ground-fs" type="notjs">
-    // note this is used for more than just the cube
-    precision highp float;
-    varying vec3 outPos;
-    void main(void) {
-        float xs = step(1.0,mod(outPos.x,2.0));
-        float zs = step(1.0,mod(outPos.z,2.0));
-        float ss = (xs>.5) ? zs : 1.0-zs;
-        gl_FragColor = mix(vec4(0.5,0.5,0.5,1),
-                           vec4(0.3,0.5,0.4,1),
-                           ss
-                           );
-
-    }
-</script>
-
 </html>
