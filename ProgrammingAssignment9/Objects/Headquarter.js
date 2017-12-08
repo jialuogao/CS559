@@ -170,7 +170,11 @@ var Headquarter = undefined;
       buffers = twgl.createBufferInfoFromArrays(gl,arrays);
     }
   };
+  Headquarter.prototype.shadow = function(drawingState){
+    var modelM = twgl.m4.scaling([this.size,this.size,this.size]);
+      setUpShadowMap(drawingState,modelM);
 
+  }
   Headquarter.prototype.draw = function(drawingState) {
     var modelM = twgl.m4.scaling([this.size,this.size,this.size]);
     twgl.m4.setTranslation(modelM,this.position,modelM);

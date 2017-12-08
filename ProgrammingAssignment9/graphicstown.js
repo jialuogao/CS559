@@ -243,7 +243,6 @@ window.onload = function() {
 
             grobjects.forEach(function (obj) {
                 if(obj.draw) {
-                  setUpShadowMap(drawingState);
                   obj.draw(drawingState,512);
                 }
             });

@@ -1,7 +1,7 @@
 var shadowRangeNearFar = [0.05,1000];
 var m4 = twgl.m4;
 var shadowMapGenProgram=undefined;
-var setUpShadowMap=function(drawingState, texSize){
+var setUpShadowMap=function(drawingState,modelM, texSize){
   var gl = drawingState.gl;
   var textureSize = 512||texSize;
 
@@ -26,10 +26,10 @@ var setUpShadowMap=function(drawingState, texSize){
   var depthRenderbuffer = gl.createRenderbuffer();
   gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderbuffer);
   gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, textureSize, textureSize);
-  generateShadowMap(drawingState,shadowMapCube,shadowMapFramebuffer,depthRenderbuffer,textureSize);
+  generateShadowMap(drawingState,shadowMapCube,shadowMapFramebuffer,depthRenderbuffer,textureSize,modelM);
 }
 
-function generateShadowMap(drawingState,shadowMapCube,shadowMapFramebuffer,depthRenderbuffer,textureSize){
+function generateShadowMap(drawingState,shadowMapCube,shadowMapFramebuffer,depthRenderbuffer,textureSize,modelM){
   var gl = drawingState.gl;
   if(!shadowMapGenProgram){
     shadowMapGenProgram = twgl.createProgramInfo(gl, ["shadowMapGen-vs", "shadowMapGen-fs"]);
@@ -50,8 +50,8 @@ function generateShadowMap(drawingState,shadowMapCube,shadowMapFramebuffer,depth
   //set attribute and uniforms
   twgl.setUniforms(shadowMapGenProgram,{
       lightPosition: lightPosition,
-      shadowRangeNearFar: shadowRangeNearFar});
-  gl.uniform2fv(shadowMGPprogram.uniforms.shadowRangeNearFar, shadowRangeNearFar);
+      shadowRangeNearFar: shadowRangeNearFar
+    });
 
   var eye = lightPosition;
   var target = [1,0,0];
