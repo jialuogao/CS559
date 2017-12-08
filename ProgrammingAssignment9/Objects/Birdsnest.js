@@ -85,7 +85,6 @@ var Birdsnest = undefined;
         view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
         lightColor:drawingState.sunColor, model: modelM
       });
-      twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
 
       shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
       gl.uniform1i(shaderProgram.program.uTexture, meshes[i].texture[0]);
@@ -103,14 +102,18 @@ var Birdsnest = undefined;
         case 3:
           gl.activeTexture(gl.TEXTURE3);
           break;
+        case 4:
+          gl.activeTexture(gl.TEXTURE4);
+          break;
+        case 5:
+          gl.activeTexture(gl.TEXTURE5);
+          break;
         default:
           break;
       }
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-      if(meshes[i].texture[0]!=undefined){
-        initTexture(gl,texture,meshes[i]);
-      }
+      twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
     }
   };
   Birdsnest.prototype.center = function(drawingState){

@@ -1,7 +1,7 @@
 var grobjects = grobjects || [];
 
 var Watercube = undefined;
-
+var texture = undefined;
 (function(){
   "use strict";
   var shaderProgram = undefined;
@@ -83,11 +83,7 @@ var Watercube = undefined;
       };
       buffers = twgl.createBufferInfoFromArrays(gl,arrays);
       gl.useProgram(shaderProgram.program);
-      shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
-      gl.uniform1i(shaderProgram.program.uTexture, 2);
-      var texture = gl.createTexture();
-      gl.activeTexture(gl.TEXTURE2);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
+      texture = gl.createTexture();
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       initTextureThenDraw(gl,texture);
     }
@@ -100,8 +96,13 @@ var Watercube = undefined;
     gl.useProgram(shaderProgram.program);
     twgl.setBuffersAndAttributes(gl,shaderProgram,buffers);
     twgl.setUniforms(shaderProgram,{
-        view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-        lightColor:drawingState.sunColor, model: modelM});
+      view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
+      lightColor:drawingState.sunColor, model: modelM
+    });
+    shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
+    gl.uniform1i(shaderProgram.program.uTexture, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
   };
   Watercube.prototype.center = function(drawingState){
@@ -114,6 +115,7 @@ var Watercube = undefined;
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindTexture(gl.TEXTURE_2D, null); 
   };
 
   function initTextureThenDraw(gl,texture)
