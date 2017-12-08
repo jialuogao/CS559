@@ -74,6 +74,7 @@ var Birdsnest = undefined;
   };
 
   Birdsnest.prototype.draw = function(drawingState) {
+    console.log("draw"+Date.now());
     var modelM = twgl.m4.scaling([this.size/100000,this.size/100000,this.size/100000]);
     twgl.m4.setTranslation(modelM,this.position,modelM);
     var gl = drawingState.gl;
