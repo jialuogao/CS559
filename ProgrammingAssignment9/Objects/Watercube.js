@@ -56,7 +56,7 @@ var Watercube = undefined;
           }
         }
       }
-      var texture = [
+      var texCoord = [
         //bot x z
         0,0, 0,0, 0,0,
         0,0, 0,0, 0,0,
@@ -79,7 +79,7 @@ var Watercube = undefined;
       var arrays = {
         vPosition : { numComponents: 3, data: pos },
         vNormal : { numComponents: 3, data: norms },
-        vTexCorrd: { numComponents: 2, data: texture}
+        vTexCorrd: { numComponents: 2, data: texCoord}
       };
       buffers = twgl.createBufferInfoFromArrays(gl,arrays);
       gl.useProgram(shaderProgram.program);
