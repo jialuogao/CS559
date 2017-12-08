@@ -406,4 +406,88 @@
       gl_FragColor = vec4(texCube, 1.0);
   }
 </script>
+
+<script id-"shadowMapGen-vs" type="notjs">
+  precision highp float;
+
+  uniform mat4 model;
+  uniform mat4 view;
+  uniform mat4 proj;
+
+  attribute vec3 vPosition;
+  varying vec3 fPosition;
+
+  void main(){
+    fPosition = (model*vec4(vPosition,1.0)).xyz;
+    gl_Position = proj * view * vec4(fPosition, 1.0);
+  }
+</script>
+<script id-"shadowMapGen-fs" type="notjs">
+  precision highp float;
+
+  uniform vec3 lightPosition;
+  uniform vec2 shadowRangeNearFar;
+
+  varying vec3 fPosition;
+
+  void main(){
+    vec3 lightToFrag = (fPosition - lightPosition);
+
+    float lightFragDistance = length(lightToFrag);
+    float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
+    float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
+
+    gl_FragColor = (lightFragDistance,lightFragDistance,lightFragDistance,1.0);
+
+  }
+</script>
+
+<script id="shadow-vs" type="nonjs">
+  precision highp float;
+
+  uniform mat4 model;
+  uniform mat4 view;
+  uniform mat4 proj;
+
+  attribute vec3 vPosition;
+  attribute vec3 vNormal;
+
+  varying vec3 fPosition;
+  varying vec3 fNormal;
+
+  void main(){
+    fPosition = (model*vec4(vPosition,1.0)).xyz;
+    fNormal = (model*vec4(vNormal,0.0)).xyz;
+
+    gl_Position = proj * view * vec4(fPosition, 1.0);
+  }
+</script>
+<script id="shadow-fs" type="nonjs">
+  precision highp float;
+
+  uniform vec3 lightPosition;
+
+  uniform samplerCube shadowMap;
+  uniform vec2 shadowRangeNearFar;
+
+  varying vec3 fPosition;
+  varying vec3 fNormal;
+  void main(){
+    vec3 lightDir = normalize(lightPosition - fPosition);
+    vec3 lightToFrag = (fPosition - lightPosition);
+
+    float lightFragDistance = length(lightToFrag);
+    float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
+    float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
+
+    float shadowValue = textureCube(shadowMap, lightDir).r;
+
+    vec3 color = vec3(0,0,0);
+    if(shadowValue <= lightToFrag){
+      color *= 0.5;
+    }
+    gl_FragColor = (color,1.0);
+
+  }
+</script>
 </html>

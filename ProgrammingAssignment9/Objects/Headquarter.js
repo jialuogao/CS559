@@ -4,6 +4,7 @@ var Headquarter = undefined;
 
 (function(){
   "use strict";
+  var shadowShaderProgram = undefined;
   var shaderProgram = undefined;
   var buffers = undefined;
 
