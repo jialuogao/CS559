@@ -86,7 +86,7 @@ var Watercube = undefined;
       shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
       gl.uniform1i(shaderProgram.program.uTexture, 2);
       var texture = gl.createTexture();
-    	gl.activeTexture(gl.TEXTURE2);
+      gl.activeTexture(gl.TEXTURE2);
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       initTextureThenDraw(gl,texture);

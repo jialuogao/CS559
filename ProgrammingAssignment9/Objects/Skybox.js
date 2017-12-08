@@ -15,7 +15,6 @@ var Skybox = undefined;
   var skybox_posy = LoadedImageFiles["skybox_posy.png"];
   var skybox_negy = LoadedImageFiles["skybox_negy.png"];
 
-  skybox_posx = ""
   Skybox = function Skybox() {
        this.name = "skybox"
        this.position = [0,0,0];
@@ -34,51 +33,37 @@ var Skybox = undefined;
           -s,-s,-s, s,-s,-s, s,-s,s, -s,-s,-s, s,-s,s, -s,-s,s,
           s,-s,-s, s,s,-s, s,s,s, s,-s,-s, s,s,s, s,-s,s,
           -s,-s,-s, -s,-s,s, -s,s,s, -s,-s,-s, -s,s,s, -s,s,-s
-        ]},
-        vNoramal: {numComponents: 3, data:[0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1,
-          0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1,
-          0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,1,0,
-          0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0,
-          1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0,
-          -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0
-        ]},
-        vTexCorrd:{numComponents: 2, data:[0,0,  1,0,  1,1,  0,0,  1,1,  0,1,
-          0,0,  1,0,  1,1,  0,0,  1,1,  0,1,
-          0,0,  1,0,  1,1,  0,0,  1,1,  0,1,
-          0,0,  1,0,  1,1,  0,0,  1,1,  0,1,
-          0,0,  1,0,  1,1,  0,0,  1,1,  0,1,
-          0,0,  1,0,  1,1,  0,0,  1,1,  0,1
         ]}
+        // ,vNoramal: {numComponents: 3, data:[0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1,
+        //   0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1,
+        //   0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,1,0,
+        //   0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0,
+        //   1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0,
+        //   -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0
+        // ]}
        };
        skyboxBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,arrays);
-
+       gl.useProgram(shaderProgram.program);
+       shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "skybox");
+       gl.uniform1i(shaderProgram.program.uTexture, 3);
        var texture = gl.createTexture();
+       gl.activeTexture(gl.TEXTURE3);
        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
 
        // X
        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, skybox_posx);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
        // -X
        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, skybox_negx);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
        // Z
        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, skybox_posz);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
        // -Z
        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, skybox_negz);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
        // Y
        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, skybox_posy);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
        // -Y
        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, skybox_negy);
@@ -98,8 +83,9 @@ var Skybox = undefined;
        var gl = drawingState.gl;
        gl.useProgram(shaderProgram.program);
        twgl.setUniforms(shaderProgram,{
-         view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-         lightColor:drawingState.sunColor, model: modelM
+         view:drawingState.view, proj:drawingState.proj, model: modelM,
+         //lightdir:drawingState.sunDirection,
+         //lightColor:drawingState.sunColor
        });
        twgl.setBuffersAndAttributes(gl,shaderProgram,skyboxBuffers);
        twgl.drawBufferInfo(gl, gl.TRIANGLES, skyboxBuffers);
