@@ -51,7 +51,7 @@ function generateShadowMap(drawingState,shadowMapCube,shadowMapFramebuffer,depth
   twgl.setUniforms(shadowMapGenProgram,{
       lightPosition: lightPosition,
       shadowRangeNearFar: shadowRangeNearFar});
-  gl.uniform2fv(shadowMGPprogram.uniforms.shadowRangeNearFar, shadowRangeNearFar)
+  gl.uniform2fv(shadowMGPprogram.uniforms.shadowRangeNearFar, shadowRangeNearFar);
 
   var eye = lightPosition;
   var target = [1,0,0];
@@ -115,19 +115,4 @@ function generateShadowMap(drawingState,shadowMapCube,shadowMapFramebuffer,depth
   gl.clear(gl.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
   drawAll(drawingState);
 
-}
-
-function drawAll(drawingState){
-  grobjects.forEach(function(obj) {
-      if(!obj.__initialized) {
-          if(isValidGraphicsObject(obj)){
-              obj.init(drawingState);
-              obj.__initialized = true;
-          }
-      }
-  });
-
-  grobjects.forEach(function (obj) {
-      if(obj.draw) obj.draw(drawingState);
-  });
 }
