@@ -178,8 +178,9 @@ var Headquarter = undefined;
     gl.useProgram(shaderProgram.program);
     twgl.setBuffersAndAttributes(gl,shaderProgram,buffers);
     twgl.setUniforms(shaderProgram,{
-        view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-        lightColor:drawingState.sunColor, model: modelM, objColor: this.color});
+      view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
+      lightColor:drawingState.sunColor, model: modelM, objColor: this.color
+    });
     twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
   };
   Headquarter.prototype.center = function(drawingState){

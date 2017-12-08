@@ -242,7 +242,10 @@ window.onload = function() {
         } else {
 
             grobjects.forEach(function (obj) {
-                if(obj.draw) obj.draw(drawingState);
+                if(obj.draw) {
+                  setUpShadowMap(drawingState);
+                  obj.draw(drawingState,512);
+                }
             });
 
             grobjects.forEach(function (obj) {

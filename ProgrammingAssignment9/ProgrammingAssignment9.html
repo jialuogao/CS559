@@ -24,6 +24,7 @@
 <!-- I am adding the helicopter -->
 <script src="Objects/helicopter.js"></script>
 <script src="Objects/helicopterMesh.js"></script>
+<script src="Objects/shadows.js"></script>
 <!-- This gets loaded LAST (actually, it probably doesn't have to) -->
 <script src="graphicstown.js"></script>
 
@@ -407,7 +408,7 @@
   }
 </script>
 
-<script id-"shadowMapGen-vs" type="notjs">
+<script id="shadowMapGen-vs" type="notjs">
   precision highp float;
 
   uniform mat4 model;
@@ -422,7 +423,7 @@
     gl_Position = proj * view * vec4(fPosition, 1.0);
   }
 </script>
-<script id-"shadowMapGen-fs" type="notjs">
+<script id="shadowMapGen-fs" type="notjs">
   precision highp float;
 
   uniform vec3 lightPosition;
@@ -437,7 +438,7 @@
     float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
     float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
 
-    gl_FragColor = (lightFragDistance,lightFragDistance,lightFragDistance,1.0);
+    gl_FragColor = vec4(lightFragDistance,lightFragDistance,lightFragDistance,1.0);
 
   }
 </script>
