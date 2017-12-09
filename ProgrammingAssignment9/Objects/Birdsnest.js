@@ -6,9 +6,9 @@ var Birdsnest = undefined;
   "use strict";
   var shaderProgram = undefined;
   var buffers = undefined;
-  var image = new Image();
   var modelArray = new Array();
   var textureArray = new Array();
+  var imageArray = new Array();
   var meshes = loaded_model["Birdsnest.obj"].meshes;
   var numMeshes = loaded_model["Birdsnest.obj"].mesh_number;
   var texture = undefined;
@@ -69,9 +69,13 @@ var Birdsnest = undefined;
         }
         buffers = twgl.createBufferInfoFromArrays(gl,arrays);
         modelArray.push(buffers);
+
+        gl.useProgram(shaderProgram.program);
         texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        initTexture(gl,texture,meshes[i]);
+        textureArray.push(texture);
+        imageArray.push(initTexture(gl,texture,meshes[i]));
       }
     }
   };
@@ -87,34 +91,31 @@ var Birdsnest = undefined;
         view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
         lightColor:drawingState.sunColor, model: modelM
       });
-
       shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
-      gl.uniform1i(shaderProgram.program.uTexture, meshes[i].texture[0]);
-      texture = gl.createTexture();
       switch (meshes[i].texture[0]) {
         case 0:
-          gl.activeTexture(gl.TEXTURE0);
-          break;
+        gl.activeTexture(gl.TEXTURE0);
+        break;
         case 1:
-          gl.activeTexture(gl.TEXTURE1);
-          break;
+        gl.activeTexture(gl.TEXTURE1);
+        break;
         case 2:
-          gl.activeTexture(gl.TEXTURE2);
-          break;
+        gl.activeTexture(gl.TEXTURE2);
+        break;
         case 3:
-          gl.activeTexture(gl.TEXTURE3);
-          break;
+        gl.activeTexture(gl.TEXTURE3);
+        break;
         case 4:
-          gl.activeTexture(gl.TEXTURE4);
-          break;
+        gl.activeTexture(gl.TEXTURE4);
+        break;
         case 5:
-          gl.activeTexture(gl.TEXTURE5);
-          break;
+        gl.activeTexture(gl.TEXTURE5);
+        break;
         default:
-          break;
+        break;
       }
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      LoadTexture(gl,textureArray[i],imageArray[i]);
+      gl.uniform1i(shaderProgram.program.uTexture, meshes[i].texture[0]);
       twgl.drawBufferInfo(gl, gl.TRIANGLES, modelArray[i]);
     }
   };
@@ -122,7 +123,7 @@ var Birdsnest = undefined;
     return this.position;
   }
 
-  function LoadTexture(gl,texture){
+  function LoadTexture(gl,texture,image){
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -132,16 +133,16 @@ var Birdsnest = undefined;
 
   function initTexture(gl,texture,mesh)
   {
-    try{
-
-    if(mesh.texture.length!=0)
+    var image = new Image();
+    if(mesh.texture.length!=0){
       image.src = loaded_model["Birdsnest.obj"].textures[(mesh.texture)[0]].src;
-    }catch(err){
-      return 1;
+    } else {
+      image=new Image();
     }
     image.onload = function(){
-      LoadTexture(gl,texture);
+      LoadTexture(gl,texture,image);
     }
+    return image;
   }
 })();
 

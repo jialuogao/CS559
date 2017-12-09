@@ -104,6 +104,7 @@ var groundPlaneSize = groundPlaneSize || 50;
             twgl.setUniforms(shaderProgram,{
               view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
               lightColor:drawingState.sunColor, model: twgl.m4.identity(), objColor: [1,1,1]});
+            shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
             gl.activeTexture(gl.TEXTURE0);
             LoadTexture(gl,texture,image);
             gl.uniform1i(shaderProgram.program.uTexture,0);
