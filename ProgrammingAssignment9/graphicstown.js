@@ -215,7 +215,8 @@ window.onload = function() {
             timeOfDay : tod,
             sunDirection : sunDirection,
             realtime : realtime,
-            sunColor : sunColor
+            sunColor : sunColor,
+            drivePos : drivePos
         }
 
         // initialize all of the objects that haven't yet been initialized (that way objects can be added at any point)

@@ -11,7 +11,7 @@ var Birdsnest = undefined;
   var textureArray = new Array();
   var meshes = loaded_model["Birdsnest.obj"].meshes;
   var numMeshes = loaded_model["Birdsnest.obj"].mesh_number;
-
+  var texture = undefined;
   Birdsnest = function Birdsnest(position, size){
     this.name = "Bird's Net";
     this.position = position || [0,0,0];
@@ -69,6 +69,9 @@ var Birdsnest = undefined;
         }
         buffers = twgl.createBufferInfoFromArrays(gl,arrays);
         modelArray.push(buffers);
+        texture = gl.createTexture();
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        initTexture(gl,texture,meshes[i]);
       }
     }
   };
@@ -87,7 +90,7 @@ var Birdsnest = undefined;
 
       shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
       gl.uniform1i(shaderProgram.program.uTexture, meshes[i].texture[0]);
-      var texture = gl.createTexture();
+      texture = gl.createTexture();
       switch (meshes[i].texture[0]) {
         case 0:
           gl.activeTexture(gl.TEXTURE0);
@@ -129,7 +132,13 @@ var Birdsnest = undefined;
 
   function initTexture(gl,texture,mesh)
   {
-  	image.src = loaded_model["Birdsnest.obj"].textures[mesh.texture[0]].src;
+    try{
+
+    if(mesh.texture.length!=0)
+      image.src = loaded_model["Birdsnest.obj"].textures[(mesh.texture)[0]].src;
+    }catch(err){
+      return 1;
+    }
     image.onload = function(){
       LoadTexture(gl,texture);
     }

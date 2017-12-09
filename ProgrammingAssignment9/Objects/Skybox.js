@@ -20,6 +20,7 @@ var Skybox = undefined;
        this.position = [0,0,0];
    }
    Skybox.prototype.init = function(drawingState) {
+     this.position = drawingState.drivePos;
      var gl=drawingState.gl;
      if (!shaderProgram) {
          shaderProgram = twgl.createProgramInfo(gl, ["skybox-vs", "skybox-fs"]);
