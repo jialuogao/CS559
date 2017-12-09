@@ -205,7 +205,7 @@ window.onload = function() {
         var tod = Number(sliders.TimeOfDay.value);
         var sunAngle = Math.PI* (tod-6)/12;
         var sunDirection = [Math.sin(sunAngle)*0.2,Math.sin(sunAngle),Math.cos(sunAngle)];
-        var sunColor = [1.0,Math.pow(Math.sin(sunAngle),2.0)+1/3,Math.pow(Math.sin(sunAngle),2)];
+        var sunColor = [1.6,Math.pow(Math.sin(sunAngle),2.0)+1/3,Math.pow(Math.sin(sunAngle),2)];
         // make a real drawing state for drawing
         var drawingState = {
             gl : gl,
