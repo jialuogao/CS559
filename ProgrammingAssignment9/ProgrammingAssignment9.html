@@ -188,9 +188,9 @@
     varying vec3 pos;
     varying vec2 fTexCoord;
     uniform sampler2D uTexture;
-    const float ambient_coeff = 0.4;
+    const float ambient_coeff = 0.3;
     const float specular_coeff  = 0.7;
-    const float specular_exp    = 100.0;
+    const float specular_exp    = 1000.0;
 
     void main(void) {
         vec4 vNormal = normalize(tModel * vec4(normal,0.0));
@@ -203,7 +203,7 @@
         vec3 tcolor = textureColor.xyz;
         vec3 ambient_color = ambient_coeff * tcolor;
         vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * cLight;
-        gl_FragColor = vec4(ambient_color + specular_color + diffuse * (cLight+tcolor)/2.0, 1.0);
+        gl_FragColor = vec4(ambient_color + specular_color + diffuse * (cLight+vec3(1,1,1))/2.0, 1.0);
     }
 </script>
 
