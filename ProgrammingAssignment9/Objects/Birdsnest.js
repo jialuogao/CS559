@@ -74,7 +74,6 @@ var Birdsnest = undefined;
   };
 
   Birdsnest.prototype.draw = function(drawingState) {
-    console.log("draw"+Date.now());
     var modelM = twgl.m4.scaling([this.size/100000,this.size/100000,this.size/100000]);
     twgl.m4.setTranslation(modelM,this.position,modelM);
     var gl = drawingState.gl;
@@ -113,7 +112,7 @@ var Birdsnest = undefined;
       }
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-      twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
+      twgl.drawBufferInfo(gl, gl.TRIANGLES, modelArray[i]);
     }
   };
   Birdsnest.prototype.center = function(drawingState){
@@ -130,7 +129,6 @@ var Birdsnest = undefined;
 
   function initTexture(gl,texture,mesh)
   {
-  	image.crossOrigin = "anonymous";
   	image.src = loaded_model["Birdsnest.obj"].textures[mesh.texture[0]].src;
     image.onload = function(){
       LoadTexture(gl,texture);
