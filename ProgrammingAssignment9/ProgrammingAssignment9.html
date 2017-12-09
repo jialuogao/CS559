@@ -264,7 +264,7 @@
         vec3 ambient_color = ambient_coeff * tcolor;
         vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * cLight;
         gl_FragColor = vec4(ambient_color + specular_color + diffuse * (cLight+tcolor)/2.0, 1.0);
-        gl_FragColor = vec4(diffuse* 2.5 * vec3(0,0.7,0.9), 1.0);
+        //gl_FragColor = vec4(diffuse* 2.5 * vec3(0,0.7,0.9), 1.0);
       }
 </script>
 

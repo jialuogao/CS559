@@ -45,6 +45,7 @@ var groundPlaneSize = groundPlaneSize || 50;
     var shaderProgram = undefined;
     var buffers = undefined;
     var image = undefined;
+    var texture = undefined;
     // define the pyramid object
     // note that we cannot do any of the initialization that requires a GL context here
     // we define the essential methods of the object - and then wait
@@ -86,7 +87,7 @@ var groundPlaneSize = groundPlaneSize || 50;
             };
             buffers = twgl.createBufferInfoFromArrays(gl,arrays);
             gl.useProgram(shaderProgram.program);
-            var texture = gl.createTexture();
+            texture = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
             image = new Image();
@@ -105,9 +106,9 @@ var groundPlaneSize = groundPlaneSize || 50;
               view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
               lightColor:drawingState.sunColor, model: twgl.m4.identity(), objColor: [1,1,1]});
             shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
-            gl.activeTexture(gl.TEXTURE0);
-            LoadTexture(gl,texture,image);
-            gl.uniform1i(shaderProgram.program.uTexture,0);
+            gl.activeTexture(gl.TEXTURE6);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.uniform1i(shaderProgram.program.uTexture,6);
             twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
         },
         center : function(drawingState) {

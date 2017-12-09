@@ -78,7 +78,7 @@ var Skybox = undefined;
        // make the helicopter fly around
        // this will change position and orientation
 
-       var modelM = twgl.m4.rotationY(drawingState.timeOfDay/30.0);
+       var modelM = twgl.m4.rotationY(drawingState.realtime/30000);
        twgl.m4.setTranslation(modelM,twgl.m4.transformPoint(drawingState.camera, [0, 0, 0]),modelM);
        // the drawing coce is straightforward - since twgl deals with the GL stuff for us
        var gl = drawingState.gl;

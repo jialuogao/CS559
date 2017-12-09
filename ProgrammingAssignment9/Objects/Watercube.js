@@ -126,12 +126,12 @@ var normalMap = undefined;
     });
     shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
     gl.activeTexture(gl.TEXTURE4);
-    LoadTexture(gl,texture,image);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(shaderProgram.program.uTexture,4);
 
     shaderProgram.program.uNormMap = gl.getUniformLocation(shaderProgram.program, "uNormMap");
     gl.activeTexture(gl.TEXTURE5);
-    LoadTexture(gl,texture,normalMap);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(shaderProgram.program.uTexture,5);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
   };
