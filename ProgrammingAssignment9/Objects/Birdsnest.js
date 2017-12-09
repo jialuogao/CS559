@@ -91,31 +91,29 @@ var Birdsnest = undefined;
         view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
         lightColor:drawingState.sunColor, model: modelM
       });
-      shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
-      switch (meshes[i].texture[0]) {
-        case 0:
-        gl.activeTexture(gl.TEXTURE0);
-        break;
-        case 1:
-        gl.activeTexture(gl.TEXTURE1);
-        break;
-        case 2:
-        gl.activeTexture(gl.TEXTURE2);
-        break;
-        case 3:
-        gl.activeTexture(gl.TEXTURE3);
-        break;
-        case 4:
-        gl.activeTexture(gl.TEXTURE4);
-        break;
-        case 5:
-        gl.activeTexture(gl.TEXTURE5);
-        break;
-        default:
-        break;
+      if(imageArray[i]!=null){
+        shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
+        switch (meshes[i].texture[0]) {
+          case 0:
+          gl.activeTexture(gl.TEXTURE0);
+          break;
+          case 1:
+          gl.activeTexture(gl.TEXTURE1);
+          break;
+          case 2:
+          gl.activeTexture(gl.TEXTURE2);
+          break;
+          case 3:
+          gl.activeTexture(gl.TEXTURE3);
+          break;
+          default:
+          break;
+        }
+        if(i>0&&imageArray[i]!=imageArray[i-1]){
+          gl.bindTexture(gl.TEXTURE_2D, textureArray[i]);
+        }
+        gl.uniform1i(shaderProgram.program.uTexture, meshes[i].texture[0]);
       }
-      LoadTexture(gl,textureArray[i],imageArray[i]);
-      gl.uniform1i(shaderProgram.program.uTexture, meshes[i].texture[0]);
       twgl.drawBufferInfo(gl, gl.TRIANGLES, modelArray[i]);
     }
   };
@@ -136,11 +134,11 @@ var Birdsnest = undefined;
     var image = new Image();
     if(mesh.texture.length!=0){
       image.src = loaded_model["Birdsnest.obj"].textures[(mesh.texture)[0]].src;
+      image.onload = function(){
+        LoadTexture(gl,texture,image);
+      }
     } else {
-      image=new Image();
-    }
-    image.onload = function(){
-      LoadTexture(gl,texture,image);
+      image=null;
     }
     return image;
   }
