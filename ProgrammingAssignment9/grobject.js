@@ -1,3 +1,5 @@
+var m4 = twgl.m4;
+
 /**
  * Created by gleicher on 10/9/2015.
  */

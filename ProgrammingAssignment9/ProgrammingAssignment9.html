@@ -15,6 +15,7 @@
 <script src="grobject.js"></script>
 <script src="Objects/Skybox.imgjs"></script>
 <script src="Objects/Skybox.js"></script>
+<script src="Objects/shadows.js"></script>
 <script src="Objects/ground.js"></script>
 
 <script src="Objects/Headquarter.js"></script>
@@ -24,7 +25,6 @@
 
 <script src="Objects/helicopter.js"></script>
 <script src="Objects/helicopterMesh.js"></script>
-<script src="Objects/shadows.js"></script>
 <!-- This gets loaded LAST (actually, it probably doesn't have to) -->
 <script src="graphicstown.js"></script>
 
@@ -45,6 +45,8 @@
   varying mat4 tModel;
   varying vec3 pos;
   varying vec3 fcolor;
+  varying vec3 fPosition;
+  varying vec3 fNormal;
   varying vec2 fTexCoord;
   uniform mat4 view;
   uniform mat4 proj;
@@ -60,6 +62,8 @@
       cLight = lightColor;
       tModel = model;
       fcolor = objColor;
+      fPosition = (model*vec4(pos,1.0)).xyz;
+      fNormal = (model*vec4(vNormal,0.0)).xyz;
       fTexCoord = vTexCorrd;
   }
 </script>
@@ -69,9 +73,14 @@
     varying vec3 dLight;
     varying vec3 cLight;
     varying mat4 tModel;
+    varying vec3 fNormal;
+    varying vec3 fPosition;
     varying vec3 fcolor;
     varying vec3 pos;
     varying vec2 fTexCoord;
+    uniform vec2 shadowRangeNearFar;
+    uniform samplerCube shadowMapCube;
+    uniform vec3 lightPosition;
     const float ambient_coeff = 0.2;
     const float specular_coeff  = 1.0;
     const float specular_exp    = 500.0;
@@ -97,8 +106,18 @@
         vec3 h = normalize(e+l);
         vec3 ambient_color = ambient_coeff * fcolor;
         vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * cLight;
+        vec3 totalColor = Texture(fTexCoord)+ambient_color;
 
-        gl_FragColor = vec4(Texture(fTexCoord)+ambient_color + specular_color + diffuse * (3.0*cLight+fcolor)/4.0, 1.0);
+        //shadow
+        vec3 lightToFrag = (fPosition - lightPosition);
+        float lightFragDistance = length(lightToFrag);
+        float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
+        float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
+        float shadowValue = textureCube(shadowMapCube, -l).r;
+        if(shadowValue+0.03 >= lightFragDistance){
+          totalColor+= (diffuse * (3.0*cLight+fcolor)/4.0+specular_color);
+        }
+        gl_FragColor = vec4(totalColor, 1.0);
     }
 </script>
 
@@ -503,7 +522,7 @@
 
   uniform vec3 lightPosition;
 
-  uniform samplerCube shadowMap;
+  uniform samplerCube shadowMapCube;
   uniform vec2 shadowRangeNearFar;
 
   varying vec3 fPosition;
@@ -516,7 +535,7 @@
     float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
     float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
 
-    float shadowValue = textureCube(shadowMap, lightDir).r;
+    float shadowValue = textureCube(shadowMapCube, lightDir).r;
 
     vec3 color = vec3(0,0,0);
     if(shadowValue <= lightToFrag){

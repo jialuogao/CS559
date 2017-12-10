@@ -7,7 +7,7 @@ var Skybox = undefined;
   "use strict";
   var shaderProgram = undefined;
   var skyboxBuffers = undefined;
-
+  var texture = undefined;
   var skybox_posx = LoadedImageFiles["skybox_posx.png"];
   var skybox_negx = LoadedImageFiles["skybox_negx.png"];
   var skybox_posz = LoadedImageFiles["skybox_posz.png"];
@@ -44,11 +44,9 @@ var Skybox = undefined;
         // ]}
        };
        skyboxBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,arrays);
-       gl.useProgram(shaderProgram.program);
-       shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "skybox");
-       gl.uniform1i(shaderProgram.program.uTexture, 3);
-       var texture = gl.createTexture();
-       gl.activeTexture(gl.TEXTURE3);
+
+       texture = gl.createTexture();
+       gl.activeTexture(gl.TEXTURE0);
        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
 
        // X
@@ -72,6 +70,7 @@ var Skybox = undefined;
        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+       //gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
      }
    };
    Skybox.prototype.draw = function(drawingState) {
@@ -88,7 +87,11 @@ var Skybox = undefined;
          //lightdir:drawingState.sunDirection,
          //lightColor:drawingState.sunColor
        });
-       twgl.setBuffersAndAttributes(gl,shaderProgram,skyboxBuffers);
+       twgl.setBuffersAndAttributes(gl,shaderProgram,skyboxBuffers); 
+       shaderProgram.program.skybox = gl.getUniformLocation(shaderProgram.program, "skybox");
+       gl.activeTexture(gl.TEXTURE0);
+       gl.uniform1i(shaderProgram.program.skybox, 0);
+       gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
        twgl.drawBufferInfo(gl, gl.TRIANGLES, skyboxBuffers);
    };
    Skybox.prototype.center = function(drawingState) {

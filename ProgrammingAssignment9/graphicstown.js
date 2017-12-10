@@ -228,7 +228,11 @@ window.onload = function() {
                 }
             }
         });
-
+        if(!shadowReady){
+          var textureSize = 512;
+          initShadow(drawingState,textureSize);
+          shadowReady = true;
+        }
         // now draw all of the objects - unless we're in examine mode
         if (checkboxes.Examine.checked) {
             // get the examined object - too bad this is an array not an object
@@ -242,9 +246,12 @@ window.onload = function() {
             if(examined.drawAfter) examined.drawAfter(drawingState);
         } else {
 
+            shadow(drawingState,grobjects);
+
             grobjects.forEach(function (obj) {
                 if(obj.draw) {
-                  obj.draw(drawingState,512);
+                  //obj.draw(drawingState);
+                  obj.draw(drawingState,shadowMapCube);
                 }
             });
 
