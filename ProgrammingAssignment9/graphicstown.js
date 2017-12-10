@@ -220,6 +220,11 @@ window.onload = function() {
         }
 
         // initialize all of the objects that haven't yet been initialized (that way objects can be added at any point)
+        if(!shadowReady){
+          var textureSize = 512;
+          initShadow(drawingState,textureSize);
+          shadowReady = true;
+        }
         grobjects.forEach(function(obj) {
             if(!obj.__initialized) {
                 if(isValidGraphicsObject(obj)){
@@ -228,11 +233,6 @@ window.onload = function() {
                 }
             }
         });
-        if(!shadowReady){
-          var textureSize = 512;
-          initShadow(drawingState,textureSize);
-          shadowReady = true;
-        }
         // now draw all of the objects - unless we're in examine mode
         if (checkboxes.Examine.checked) {
             // get the examined object - too bad this is an array not an object

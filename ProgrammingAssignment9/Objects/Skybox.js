@@ -7,7 +7,7 @@ var Skybox = undefined;
   "use strict";
   var shaderProgram = undefined;
   var skyboxBuffers = undefined;
-  var texture = undefined;
+  var skyboxTexture = undefined;
   var skybox_posx = LoadedImageFiles["skybox_posx.png"];
   var skybox_negx = LoadedImageFiles["skybox_negx.png"];
   var skybox_posz = LoadedImageFiles["skybox_posz.png"];
@@ -45,9 +45,9 @@ var Skybox = undefined;
        };
        skyboxBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,arrays);
 
-       texture = gl.createTexture();
+       skyboxTexture = gl.createTexture();
        gl.activeTexture(gl.TEXTURE0);
-       gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+       gl.bindTexture(gl.TEXTURE_CUBE_MAP, skyboxTexture);
 
        // X
        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, skybox_posx);
@@ -73,7 +73,7 @@ var Skybox = undefined;
        //gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
      }
    };
-   Skybox.prototype.draw = function(drawingState) {
+   Skybox.prototype.draw = function(drawingState,shadowMapCube) {
        // make the helicopter fly around
        // this will change position and orientation
 
@@ -87,11 +87,11 @@ var Skybox = undefined;
          //lightdir:drawingState.sunDirection,
          //lightColor:drawingState.sunColor
        });
-       twgl.setBuffersAndAttributes(gl,shaderProgram,skyboxBuffers); 
+       twgl.setBuffersAndAttributes(gl,shaderProgram,skyboxBuffers);
        shaderProgram.program.skybox = gl.getUniformLocation(shaderProgram.program, "skybox");
        gl.activeTexture(gl.TEXTURE0);
        gl.uniform1i(shaderProgram.program.skybox, 0);
-       gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+       gl.bindTexture(gl.TEXTURE_CUBE_MAP, skyboxTexture);
        twgl.drawBufferInfo(gl, gl.TRIANGLES, skyboxBuffers);
    };
    Skybox.prototype.center = function(drawingState) {

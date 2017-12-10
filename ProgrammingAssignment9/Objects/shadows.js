@@ -10,7 +10,6 @@ function initShadow(drawingState,textureSize){
   var gl = drawingState.gl;
   textureSize = 512||textureSize;
   lightPosition = twgl.v3.mulScalar(drawingState.sunDirection,1000);
-  gl.activeTexture(gl.TEXTURE7);
   shadowMapCube = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_CUBE_MAP, shadowMapCube);
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -40,13 +39,13 @@ function initShadow(drawingState,textureSize){
 
 function shadow(drawingState,objects){
   var modelM = m4.identity();
+  lightPosition = twgl.v3.mulScalar(drawingState.sunDirection,1000);
 
   var gl = drawingState.gl;
   if(!shadowMapGenProgram){
     shadowMapGenProgram = twgl.createProgramInfo(gl, ["shadowMapGen-vs", "shadowMapGen-fs"]);
   }
   gl.useProgram(shadowMapGenProgram.program);
-  gl.activeTexture(gl.TEXTURE7);
   gl.bindTexture(gl.TEXTURE_CUBE_MAP, shadowMapCube);
   gl.bindFramebuffer(gl.FRAMEBUFFER, shadowMapFramebuffer);
   gl.bindRenderbuffer(gl.RENDERBUFFER, shadowMapRenderbuffer);
@@ -63,8 +62,8 @@ function shadow(drawingState,objects){
   twgl.setUniforms(shadowMapGenProgram,{
     lightPosition: lightPosition,
     shadowRangeNearFar: shadowRangeNearFar,
-    model:modelM,
     proj:Tprojection,
+    model:modelM,
     view:view
   });
   gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_CUBE_MAP_POSITIVE_X,shadowMapCube,0);
@@ -123,6 +122,8 @@ function shadow(drawingState,objects){
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   draw(drawingState,objects);
 
+  gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
@@ -136,12 +137,6 @@ function draw(drawingState,objects){
       var gl = drawingState.gl;
       gl.useProgram(shadowMapGenProgram.program);
       twgl.setBuffersAndAttributes(gl,shadowMapGenProgram,obj.buffers);
-      twgl.setUniforms(shadowMapGenProgram,{
-        view:drawingState.view, proj:drawingState.proj,
-         model: modelM,
-        lightPosition: lightPosition,
-        shadowRangeNearFar:shadowRangeNearFar
-      });
       twgl.drawBufferInfo(gl, gl.TRIANGLES, obj.buffers);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
