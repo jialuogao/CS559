@@ -173,7 +173,7 @@ var Headquarter = undefined;
   Headquarter.prototype.shadow = function(drawingState){
     var modelM = twgl.m4.scaling([this.size,this.size,this.size]);
       setUpShadowMap(drawingState,modelM);
-      
+
   }
   Headquarter.prototype.draw = function(drawingState) {
     var modelM = twgl.m4.scaling([this.size,this.size,this.size]);
@@ -192,4 +192,4 @@ var Headquarter = undefined;
   }
 })();
 
-grobjects.push(new Headquarter([-20,0.02,-25],5.0));
+grobjects.push(new Headquarter([-40,0.02,-25],8.0));

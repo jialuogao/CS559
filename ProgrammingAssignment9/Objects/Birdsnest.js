@@ -109,9 +109,7 @@ var Birdsnest = undefined;
           default:
           break;
         }
-        if(i>0&&imageArray[i]!=imageArray[i-1]){
-          gl.bindTexture(gl.TEXTURE_2D, textureArray[i]);
-        }
+        gl.bindTexture(gl.TEXTURE_2D, textureArray[i]);
         gl.uniform1i(shaderProgram.program.uTexture, meshes[i].texture[0]);
       }
       twgl.drawBufferInfo(gl, gl.TRIANGLES, modelArray[i]);
@@ -145,4 +143,4 @@ var Birdsnest = undefined;
 })();
 
 
-grobjects.push(new Birdsnest([15,0.02,-35],6.0));
+grobjects.push(new Birdsnest([15,0.02,-35],9.0));
