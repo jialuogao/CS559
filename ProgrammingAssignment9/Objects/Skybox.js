@@ -89,10 +89,13 @@ var Skybox = undefined;
        });
        twgl.setBuffersAndAttributes(gl,shaderProgram,skyboxBuffers);
        shaderProgram.program.skybox = gl.getUniformLocation(shaderProgram.program, "skybox");
-       gl.activeTexture(gl.TEXTURE0);
-       gl.uniform1i(shaderProgram.program.skybox, 0);
+       gl.activeTexture(gl.TEXTURE1);
+       gl.uniform1i(shaderProgram.program.skybox, 1);
        gl.bindTexture(gl.TEXTURE_CUBE_MAP, skyboxTexture);
        twgl.drawBufferInfo(gl, gl.TRIANGLES, skyboxBuffers);
+       gl.bindTexture(gl.TEXTURE_CUBE_MAP,null);
+       gl.enable(gl.DEPTH_TEST);
+       gl.clear(gl.DEPTH_BUFFER_BIT);
    };
    Skybox.prototype.center = function(drawingState) {
        return this.position;

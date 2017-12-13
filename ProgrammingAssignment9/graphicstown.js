@@ -84,7 +84,6 @@ window.onload = function() {
     // this could be gl = canvas.getContext("webgl");
     // but twgl is more robust
     var gl = twgl.getWebGLContext(canvas);
-
     // make a fake drawing state for the object initialization
     var drawingState = {
         gl : gl,
@@ -220,10 +219,11 @@ window.onload = function() {
         }
 
         // initialize all of the objects that haven't yet been initialized (that way objects can be added at any point)
-        if(!shadowReady){
+        var shadow = new Shadow();
+        if(!shadow.shadowReady){
           var textureSize = 512;
-          initShadow(drawingState,textureSize);
-          shadowReady = true;
+          shadow.initShadow(drawingState,textureSize);
+          shadow.shadowReady = true;
         }
         grobjects.forEach(function(obj) {
             if(!obj.__initialized) {
@@ -246,12 +246,12 @@ window.onload = function() {
             if(examined.drawAfter) examined.drawAfter(drawingState);
         } else {
 
-            shadow(drawingState,grobjects);
+            shadow.shadow(drawingState,grobjects);
 
             grobjects.forEach(function (obj) {
                 if(obj.draw) {
-                  //obj.draw(drawingState);
-                  obj.draw(drawingState,shadowMapCube);
+                  obj.draw(drawingState);
+                  //obj.draw(drawingState,shadow);
                 }
             });
 
