@@ -5,7 +5,7 @@
   -->
 <head>
     <meta charset="UTF-8">
-    <title>PA9</title>
+    <title>PA10</title>
 </head>
 <body>
 <!-- load this stuff first -->
@@ -17,6 +17,7 @@
 <script src="Objects/Skybox.imgjs"></script>
 <script src="Objects/Skybox.js"></script>
 <script src="Objects/ground.js"></script>
+<script src="Objects/shadowtest.js"></script>
 
 <script src="Objects/Headquarter.js"></script>
 <script src="Objects/Watercube.js"></script>
@@ -79,7 +80,7 @@
     varying vec3 pos;
     varying vec2 fTexCoord;
     uniform vec2 shadowRangeNearFar;
-    uniform samplerCube shadowMapCube;
+    uniform sampler2D shadowMapCube;
     uniform vec3 lightPosition;
     const float ambient_coeff = 0.2;
     const float specular_coeff  = 1.0;
@@ -113,7 +114,8 @@
         float lightFragDistance = length(lightToFrag);
         float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
         float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
-        float shadowValue = textureCube(shadowMapCube, -l).r;
+        float shadowValue = texture2D(shadowMapCube, fTexCoord).x;
+
         if(shadowValue+0.03 >= lightFragDistance){
           totalColor+= (diffuse * (3.0*cLight+fcolor)/4.0+specular_color);
         }
@@ -313,6 +315,8 @@
   uniform mat4 model;
   uniform vec3 lightdir;
   uniform vec3 lightColor;
+  varying vec3 fPosition;
+
   void main(void) {
       pos = (view * model * vec4(vPosition, 1.0)).xyz;
       gl_Position = proj * view * model * vec4(vPosition, 1.0);
@@ -321,6 +325,7 @@
       cLight = lightColor;
       tModel = model;
       fTexCoord = vTexCorrd;
+      fPosition = (model*vec4(vPosition,1.0)).xyz;
   }
 </script>
 <script id="ground-fs" type="notjs">
@@ -332,6 +337,11 @@
     varying vec3 pos;
     varying vec2 fTexCoord;
     uniform sampler2D uTexture;
+    uniform vec2 shadowRangeNearFar;
+    uniform sampler2D shadowMap;
+    uniform vec3 lightPosition;
+    varying vec3 fPosition;
+    uniform mat4 shadowMVP;
     const float ambient_coeff = 0.25;
 
     void main(void) {
@@ -362,7 +372,24 @@
         vec3 ambient_color = ambient_coeff * tcolor;
         vec3 specular_color = specular_coeff * pow(max(0.0,dot(n,h)),specular_exp) * cLight;
 
-        vec3 totalColor = ambient_color + specular_color + diffuse * (cLight+tcolor)/2.0;
+        vec3 totalColor = ambient_color;
+
+
+
+        vec2 texc = ((shadowMVP*vec4(fPosition,1.0)).xy+1.0)/2.0;
+        float shadowValue = texture2D(shadowMap, texc).x;
+        vec3 shadowVec = texture2D(shadowMap, fTexCoord).xyz;
+
+        //float lightFragDistance = (shadowMVP*vec4(fPosition,1.0)).z;
+        vec3 lightToFrag = vec4(fPosition,1.0).xyz - vec4(lightPosition,1.0).xyz;
+        lightToFrag = (fPosition - lightPosition);
+        float lightFragDistance = length(lightToFrag);
+
+        float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
+        float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
+        if(shadowValue+0.01>= normalizedLFDist){
+          totalColor+= + specular_color + diffuse * (cLight+tcolor)/2.0;
+        }
 
 
         gl_FragColor = vec4(totalColor, 1.0);
@@ -488,14 +515,18 @@
   varying vec3 fPosition;
 
   void main(){
-    vec3 lightToFrag = (fPosition - lightPosition);
+    if(lightPosition.y>=0.0){
+      vec3 lightToFrag = (fPosition - lightPosition);
 
-    float lightFragDistance = length(lightToFrag);
-    float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
-    float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
+      float lightFragDistance = length(lightToFrag);
+      float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
+      float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
 
-    gl_FragColor = vec4(lightFragDistance,lightFragDistance,lightFragDistance,1.0);
-
+      gl_FragColor = vec4(normalizedLFDist,normalizedLFDist,normalizedLFDist,1.0);
+    }
+    else{
+      gl_FragColor = vec4(1.1,1.1,1.1,1.0);
+    }
   }
 </script>
 
@@ -508,14 +539,16 @@
 
   attribute vec3 vPosition;
   attribute vec3 vNormal;
+  attribute vec2 vTexCorrd;
 
   varying vec3 fPosition;
   varying vec3 fNormal;
+  varying vec2 fTexCoord;
 
   void main(){
     fPosition = (model*vec4(vPosition,1.0)).xyz;
     fNormal = (model*vec4(vNormal,0.0)).xyz;
-
+    fTexCoord = vTexCorrd;
     gl_Position = proj * view * vec4(fPosition, 1.0);
   }
 </script>
@@ -524,27 +557,24 @@
 
   uniform vec3 lightPosition;
 
-  uniform samplerCube shadowMapCube;
+  uniform sampler2D shadowMap;
   uniform vec2 shadowRangeNearFar;
 
   varying vec3 fPosition;
   varying vec3 fNormal;
+  varying vec2 fTexCoord;
   void main(){
-    vec3 lightDir = normalize(lightPosition - fPosition);
+    //vec3 lightDir = normalize(lightPosition - fPosition);
     vec3 lightToFrag = (fPosition - lightPosition);
 
     float lightFragDistance = length(lightToFrag);
     float shadowRange = shadowRangeNearFar.y - shadowRangeNearFar.x;
     float normalizedLFDist = (lightFragDistance - shadowRangeNearFar.x)/shadowRange;
 
-    float shadowValue = textureCube(shadowMapCube, lightDir).r;
+    //float shadowValue = shadowVec.x;
 
-    vec3 color = vec3(0,0,0);
-    if(shadowValue <= lightToFrag){
-      color *= 0.5;
-    }
-    gl_FragColor = (color,1.0);
-
+    vec3 shadowVec = texture2D(shadowMap, fTexCoord).xyz;
+    gl_FragColor = vec4(shadowVec,1.0);
   }
 </script>
 </html>

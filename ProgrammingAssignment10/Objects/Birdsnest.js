@@ -5,8 +5,6 @@ var Birdsnest = undefined;
 (function(){
   "use strict";
   var shaderProgram = undefined;
-  var buffers = undefined;
-  var modelArray = new Array();
   var textureArray = new Array();
   var imageArray = new Array();
   var meshes = loaded_model["Birdsnest.obj"].meshes;
@@ -16,14 +14,18 @@ var Birdsnest = undefined;
     this.name = "Bird's Net";
     this.position = position || [0,0,0];
     this.size = size || 1.0;
+    this.buffers = new Array();
+    this.model = twgl.m4.scaling([1/100000,1/100000,1/100000]);
   }
   Birdsnest.prototype.init = function(drawingState){
     var gl = drawingState.gl;
+    this.model = m4.multiply(m4.scaling([this.size,this.size,this.size]),this.model);
+    m4.setTranslation(this.model,this.position,this.model);
     if(!shaderProgram){
       shaderProgram = twgl.createProgramInfo(gl, ["birdsnest-vs", "birdsnest-fs"]);
     }
 
-    if(!buffers){
+    if(this.buffers.length==0){
       for(var i =0; i <numMeshes; i++){
         var v = new Array();
         var n = new Array();
@@ -67,8 +69,7 @@ var Birdsnest = undefined;
           vNormal : { numComponents: 3, data: n },
           vTexCorrd: { numComponents: 2, data: t}
         }
-        buffers = twgl.createBufferInfoFromArrays(gl,arrays);
-        modelArray.push(buffers);
+        this.buffers.push(twgl.createBufferInfoFromArrays(gl,arrays));
 
         gl.useProgram(shaderProgram.program);
         texture = gl.createTexture();
@@ -81,15 +82,13 @@ var Birdsnest = undefined;
   };
 
   Birdsnest.prototype.draw = function(drawingState) {
-    var modelM = twgl.m4.scaling([this.size/100000,this.size/100000,this.size/100000]);
-    twgl.m4.setTranslation(modelM,this.position,modelM);
     var gl = drawingState.gl;
     gl.useProgram(shaderProgram.program);
     for(var i = 0; i<numMeshes ; i++){
-      twgl.setBuffersAndAttributes(gl,shaderProgram,modelArray[i]);
+      twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers[i]);
       twgl.setUniforms(shaderProgram,{
         view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-        lightColor:drawingState.sunColor, model: modelM
+        lightColor:drawingState.sunColor, model: this.model
       });
       if(imageArray[i]!=null){
         shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
@@ -112,7 +111,7 @@ var Birdsnest = undefined;
         gl.bindTexture(gl.TEXTURE_2D, textureArray[i]);
         gl.uniform1i(shaderProgram.program.uTexture, meshes[i].texture[0]);
       }
-      twgl.drawBufferInfo(gl, gl.TRIANGLES, modelArray[i]);
+      twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers[i]);
     }
   };
   Birdsnest.prototype.center = function(drawingState){
@@ -143,4 +142,4 @@ var Birdsnest = undefined;
 })();
 
 
-grobjects.push(new Birdsnest([15,0.02,-35],9.0));
+grobjects.push(new Birdsnest([10,0.02,-25],9.0));

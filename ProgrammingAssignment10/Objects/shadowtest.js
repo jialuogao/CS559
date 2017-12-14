@@ -20,13 +20,13 @@ var grobjects = grobjects || [];
 // a global variable to set the ground plane size, so we can easily adjust it
 // in the html file (before things run
 // this is the +/- in the X and Z direction (so things will go from -5 to +5 by default)
-var groundPlaneSize = groundPlaneSize || 50;
 
 // now, I make a function that adds an object to that list
 // there's a funky thing here where I have to not only define the function, but also
 // run it - so it has to be put in parenthesis
 (function() {
     "use strict";
+    var groundPlaneSize = groundPlaneSize || 10;
 
     // putting the arrays of object info here as well
     var pos = [
@@ -38,8 +38,8 @@ var groundPlaneSize = groundPlaneSize || 50;
         -groundPlaneSize, 0,  groundPlaneSize
     ];
     var texc = [
-      0,0, 0.65,0, 0.65,1,
-      0,0, 0.65,1, 0,1
+      0,0, 1,0, 1,1,
+      0,0, 1,1, 0,1
     ];
     // since there will be one of these, just keep info in the closure
     var shaderProgram = undefined;
@@ -57,7 +57,7 @@ var groundPlaneSize = groundPlaneSize || 50;
         // first I will give this the required object stuff for it's interface
         // note that the init and draw functions can refer to the fields I define
         // below
-        name : "Ground Plane",
+        name : "test",
         // the two workhorse functions - init and draw
         // init will be called when there is a GL context
         // this code gets really bulky since I am doing it all in place
@@ -66,7 +66,7 @@ var groundPlaneSize = groundPlaneSize || 50;
             var gl = drawingState.gl;
             if (!shaderProgram) {
                 //shaderProgram = twgl.createProgramInfo(gl,["ground-vs","ground-fs"]);                shaderProgram = twgl.createProgramInfo(gl,["ground-vs","ground-fs"]);
-                shaderProgram = twgl.createProgramInfo(gl,["ground-vs","ground-fs"]);
+                shaderProgram = twgl.createProgramInfo(gl,["shadow-vs","shadow-fs"]);
             }
             var norms = [];
             var v1 = new Float32Array([pos[0]-pos[3],pos[1]-pos[4],pos[2]-pos[5]]);
@@ -87,29 +87,28 @@ var groundPlaneSize = groundPlaneSize || 50;
             };
             buffers = twgl.createBufferInfoFromArrays(gl,arrays);
             gl.useProgram(shaderProgram.program);
-            texture = gl.createTexture();
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-            image = new Image();
 
-          	image.src = "";
-            image.onload = function(){
-                LoadTexture(gl,texture,image);
-            }
+
+            //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
        },
-        draw : function(drawingState) {
+        draw : function(drawingState,shadow) {
             var gl = drawingState.gl;
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, shadow.shadowMap);
+
+
             gl.useProgram(shaderProgram.program);
             twgl.setBuffersAndAttributes(gl,shaderProgram,buffers);
             twgl.setUniforms(shaderProgram,{
-              view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-              lightColor:drawingState.sunColor, model: twgl.m4.identity(), objColor: [1,1,1]});
-            shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
+              view:drawingState.view, proj:drawingState.proj,
+              model: twgl.m4.identity()
+            });
+            shaderProgram.program.shadowMap = gl.getUniformLocation(shaderProgram.program, "shadowMap");
             gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.uniform1i(shaderProgram.program.uTexture,0);
+            gl.bindTexture(gl.TEXTURE_2D, shadow.shadowMap);
+            gl.uniform1i(shaderProgram.program.shadowMap,0);
             twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
         },
         center : function(drawingState) {

@@ -10,20 +10,23 @@ var rNegZ = twgl.m4.rotationX(-Math.PI/2);
 (function(){
   "use strict";
   var shaderProgram = undefined;
-  var buffers = undefined;
   var image = undefined;
   var normMapImg = undefined;
   Watercube = function Watercube(position, size){
-  this.name = "Water Cube"
-  this.position = position || [0,0,0];
-  this.size = size || 1.0;
+    this.name = "Water Cube"
+    this.position = position || [0,0,0];
+    this.size = size || 1.0;
+    this.buffers = new Array();
+    this.model = m4.scaling([1/100,1/100,1/100]);
   }
   Watercube.prototype.init = function(drawingState){
     var gl = drawingState.gl;
+    this.model = m4.multiply(m4.scaling([this.size,this.size,this.size]),this.model);
+    m4.setTranslation(this.model,this.position,this.model);
     if(!shaderProgram){
       shaderProgram = twgl.createProgramInfo(gl,["watercube-vs","watercube-fs"]);
     }
-    if(!buffers){
+    if(this.buffers.length==0){
       var pos = [
         //bot
         177,0,177,    177,0,-177,   -177,0,-177,
@@ -87,7 +90,7 @@ var rNegZ = twgl.m4.rotationX(-Math.PI/2);
         vNormal : { numComponents: 3, data: norms },
         vTexCorrd: { numComponents: 2, data: texCoord}
       };
-      buffers = twgl.createBufferInfoFromArrays(gl,arrays);
+      this.buffers.push(twgl.createBufferInfoFromArrays(gl,arrays));
       texture = gl.createTexture();
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -120,14 +123,12 @@ var rNegZ = twgl.m4.rotationX(-Math.PI/2);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   };
   Watercube.prototype.draw = function(drawingState) {
-    var modelM = twgl.m4.scaling([this.size/100,this.size/100,this.size/100]);
-    twgl.m4.setTranslation(modelM,this.position,modelM);
     var gl = drawingState.gl;
     gl.useProgram(shaderProgram.program);
-    twgl.setBuffersAndAttributes(gl,shaderProgram,buffers);
+    twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers[0]);
     twgl.setUniforms(shaderProgram,{
       view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-      lightColor:drawingState.sunColor, model: modelM, tnModel : twgl.m4.multiply(drawingState.view,twgl.m4.identity())
+      lightColor:drawingState.sunColor, model: this.model, tnModel : twgl.m4.multiply(drawingState.view,twgl.m4.identity())
     });
     shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
     gl.activeTexture(gl.TEXTURE0);
@@ -139,7 +140,7 @@ var rNegZ = twgl.m4.rotationX(-Math.PI/2);
     gl.bindTexture(gl.TEXTURE_2D, normalMap);
     gl.uniform1i(shaderProgram.program.uNormMap,1);
 
-    twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers[0]);
   };
   Watercube.prototype.center = function(drawingState){
     return this.position;

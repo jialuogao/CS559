@@ -41,9 +41,12 @@ var groundPlaneSize = groundPlaneSize || 50;
       0,0, 0.65,0, 0.65,1,
       0,0, 0.65,1, 0,1
     ];
+    var texc2 = [
+      0,1, 1,1, 1,0,
+      0,1, 1,0, 0,0
+    ];
     // since there will be one of these, just keep info in the closure
     var shaderProgram = undefined;
-    var buffers = undefined;
     var image = undefined;
     var texture = undefined;
     // define the pyramid object
@@ -58,6 +61,8 @@ var groundPlaneSize = groundPlaneSize || 50;
         // note that the init and draw functions can refer to the fields I define
         // below
         name : "Ground Plane",
+        buffers : new Array(),
+        model : m4.identity(),
         // the two workhorse functions - init and draw
         // init will be called when there is a GL context
         // this code gets really bulky since I am doing it all in place
@@ -83,12 +88,12 @@ var groundPlaneSize = groundPlaneSize || 50;
             var arrays = {
               vPosition : { numComponents: 3, data: pos },
               vNormal : { numComponents: 3, data: norms },
-              vTexCorrd: { numComponents: 2, data: texc}
+              vTexCorrd: { numComponents: 2, data: texc2},
             };
-            buffers = twgl.createBufferInfoFromArrays(gl,arrays);
+            this.buffers.push(twgl.createBufferInfoFromArrays(gl,arrays));
             gl.useProgram(shaderProgram.program);
             texture = gl.createTexture();
-            gl.activeTexture(gl.TEXTURE0);
+            gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
             image = new Image();
@@ -99,18 +104,34 @@ var groundPlaneSize = groundPlaneSize || 50;
             }
 
        },
-        draw : function(drawingState) {
+        draw : function(drawingState,shadow) {
             var gl = drawingState.gl;
             gl.useProgram(shaderProgram.program);
-            twgl.setBuffersAndAttributes(gl,shaderProgram,buffers);
+            twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers[0]);
+
+            var eye = shadow.lightPosition;
+            var target = [0,0,0];
+            var up = drawingState.sunDirSlope;
+            var view = m4.inverse(m4.lookAt(eye,target,up));
+            var Tprojection=m4.ortho(-50, 50, -50, 50, shadow.shadowRangeNearFar[0], shadow.shadowRangeNearFar[1]);
+            var Tmvp = m4.multiply(view,Tprojection);
+
             twgl.setUniforms(shaderProgram,{
               view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-              lightColor:drawingState.sunColor, model: twgl.m4.identity(), objColor: [1,1,1]});
+              lightColor:drawingState.sunColor, model: twgl.m4.identity(), objColor: [1,1,1],
+              shadowRangeNearFar:shadow.shadowRangeNearFar,lightPosition:shadow.lightPosition,
+              shadowMVP : Tmvp
+            });
             shaderProgram.program.uTexture = gl.getUniformLocation(shaderProgram.program, "uTexture");
-            gl.activeTexture(gl.TEXTURE0);
+            gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.uniform1i(shaderProgram.program.uTexture,0);
-            twgl.drawBufferInfo(gl, gl.TRIANGLES, buffers);
+            gl.uniform1i(shaderProgram.program.uTexture,1);
+            twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers[0]);
+
+            shaderProgram.program.shadowMap = gl.getUniformLocation(shaderProgram.program, "shadowMap");
+            gl.activeTexture(gl.TEXTURE7);
+            gl.bindTexture(gl.TEXTURE_2D, shadow.shadowMap);
+            gl.uniform1i(shaderProgram.program.shadowMap,7);
         },
         center : function(drawingState) {
             return [0,0,0];

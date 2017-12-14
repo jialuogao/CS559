@@ -47,6 +47,8 @@ an example of a more complex/richer behavior.
         this.color = [0,0.33,0];
         // about the Y axis - it's the facing direction
         this.orientation = 0;
+        this.buffers = new Array();
+        this.models = new Array();
     }
     Copter.prototype.init = function(drawingState) {
         var gl=drawingState.gl;
@@ -73,13 +75,13 @@ an example of a more complex/richer behavior.
             vPosition : {numComponents: 3, data: vPosition},
             vNormal : {numComponents:3, data: vNormal},
           };
-          copterBodyBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,arrays);
+          this.buffers.push(twgl.createBufferInfoFromArrays(drawingState.gl,arrays));
 
           var rarrays = {
               vPosition : {numcomponents:3, data: main_rotorVertex},
               vNormal : {numcomponents:3, data: main_rotorNormal},
           };
-          copterRotorBuffers = twgl.createBufferInfoFromArrays(drawingState.gl,rarrays);
+          this.buffers.push(twgl.createBufferInfoFromArrays(drawingState.gl,rarrays));
         }
         // put the helicopter on a random helipad
         // see the stuff on helicopter behavior to understand the thing
@@ -90,31 +92,34 @@ an example of a more complex/richer behavior.
         this.lastTime = 0;
 
     };
+    Copter.prototype.update = function(drawingState){
+      this.models=new Array();
+      advance(this,drawingState);
+      var m4=twgl.m4;
+      // we make a model matrix to place the cube in the world
+      var modelM = m4.multiply(m4.rotationY(this.orientation),m4.rotationY(Math.PI));
+      modelM = m4.multiply(m4.scaling([1,1,1]),modelM);
+      modelM = m4.multiply(m4.rotationX(-Math.PI/2),modelM);
+      twgl.m4.setTranslation(modelM,this.position,modelM);
+      this.models.push(modelM);
+      modelM = m4.multiply(m4.rotationZ(drawingState.realtime/30.0),modelM);
+      this.models.push(modelM);
+    }
     Copter.prototype.draw = function(drawingState) {
-        // make the helicopter fly around
-        // this will change position and orientation
-        advance(this,drawingState);
-        var m4=twgl.m4;
-        // we make a model matrix to place the cube in the world
-        var modelM = m4.multiply(m4.rotationY(this.orientation),m4.rotationY(Math.PI));
-        modelM = m4.multiply(m4.scaling([1,1,1]),modelM);
-        modelM = m4.multiply(m4.rotationX(-Math.PI/2),modelM);
-        twgl.m4.setTranslation(modelM,this.position,modelM);
         // the drawing coce is straightforward - since twgl deals with the GL stuff for us
         var gl = drawingState.gl;
         gl.useProgram(shaderProgram.program);
         twgl.setUniforms(shaderProgram,{
           view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-          lightColor:drawingState.sunColor, model: modelM, objColor: this.color});
-        twgl.setBuffersAndAttributes(gl,shaderProgram,copterBodyBuffers);
-        twgl.drawBufferInfo(gl, gl.TRIANGLES, copterBodyBuffers);
+          lightColor:drawingState.sunColor, model: this.models[0], objColor: this.color});
+        twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers[0]);
+        twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers[0]);
 
-        modelM = m4.multiply(m4.rotationZ(drawingState.realtime/30.0),modelM);
         twgl.setUniforms(shaderProgram,{
           view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-          cubecolor:this.color, model: modelM});
-        twgl.setBuffersAndAttributes(gl,shaderProgram,copterRotorBuffers);
-        twgl.drawBufferInfo(gl, gl.TRIANGLES, copterRotorBuffers);
+          cubecolor:this.color, model: this.models[1]});
+        twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers[1]);
+        twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers[1]);
     };
     Copter.prototype.center = function(drawingState) {
         return this.position;

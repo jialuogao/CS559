@@ -11,14 +11,17 @@ var Headquarter = undefined;
     this.position = position || [1.5,1.5,2.0];
     this.size = size || 1.0;
     this.color = [0.6,0.9,1.0];
-    this.buffers=undefined;
+    this.model = m4.identity();
+    this.buffers=new Array();
   }
   Headquarter.prototype.init = function(drawingState){
     var gl = drawingState.gl;
+    this.model = m4.multiply(m4.scaling([this.size,this.size,this.size]),this.model);
+    m4.setTranslation(this.model,this.position,this.model);
     if(!shaderProgram){
       shaderProgram = twgl.createProgramInfo(gl, ["headquarter-vs", "headquarter-fs"]);
     }
-    if(!this.buffers){
+    if(this.buffers.length==0){
       var pos = [
         //bot out
         3.0,0.0,0.0,      3.0,0.0,1.0,      0.0,0.0,0.0,
@@ -166,34 +169,32 @@ var Headquarter = undefined;
         vNormal : { numComponents: 3, data: norms },
         vTexCorrd: { numComponents: 2, data: texCoord}
       };
-      this.buffers = twgl.createBufferInfoFromArrays(gl,arrays);
+      this.buffers.push(twgl.createBufferInfoFromArrays(gl,arrays));
     }
   };
 
   Headquarter.prototype.draw = function(drawingState,shadow) {
     var gl = drawingState.gl;
-    var modelM = m4.scaling([this.size,this.size,this.size]);
-    m4.setTranslation(modelM,this.position,modelM);
 
     gl.useProgram(shaderProgram.program);
-    twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers);
+    twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers[0]);
     twgl.setUniforms(shaderProgram,{
       view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
-      lightColor:drawingState.sunColor, model: modelM, objColor: this.color,
+      lightColor:drawingState.sunColor, model: this.model, objColor: this.color,
       shadowRangeNearFar:shadow.shadowRangeNearFar,lightPosition:shadow.lightPosition
     });
 
-    shaderProgram.program.shadowMapCube = gl.getUniformLocation(shaderProgram.program, "shadowMapCube");
+    shaderProgram.program.shadowMap = gl.getUniformLocation(shaderProgram.program, "shadowMap");
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_CUBE_MAP, shadow.shadowMapCube);
-    gl.uniform1i(shaderProgram.program.shadowMapCube,0);
+    gl.bindTexture(gl.TEXTURE_2D, shadow.shadowMap);
+    gl.uniform1i(shaderProgram.program.shadowMap,0);
 
-    twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers);
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers[0]);
   };
   Headquarter.prototype.center = function(drawingState){
     return twgl.v3.add(this.position,[1.5,1.5,2.0]);
   }
 })();
 
-//grobjects.push(new Headquarter([-40,0.02,-25],8.0));
+grobjects.push(new Headquarter([-40,0.02,-25],8.0));
 //grobjects.push(new Headquarter([-40,0.02,10],8.0));

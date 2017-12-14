@@ -123,7 +123,7 @@ window.onload = function() {
         delete keysdown[event.keyCode];
         e.stopPropagation();
     };
-
+    var shadow = new Shadow();
     // the actual draw function - which is the main "loop"
     function draw() {
 
@@ -204,6 +204,7 @@ window.onload = function() {
         var tod = Number(sliders.TimeOfDay.value);
         var sunAngle = Math.PI* (tod-6)/12;
         var sunDirection = [Math.sin(sunAngle)*0.1,Math.sin(sunAngle),Math.cos(sunAngle)];
+        var sunDirSlope = [Math.cos(sunAngle)*0.1,Math.cos(sunAngle),-Math.sin(sunAngle)];
         var sunColor = [1.6,Math.pow(Math.sin(sunAngle),2.0)+1/3,Math.pow(Math.sin(sunAngle),2)];
         // make a real drawing state for drawing
         var drawingState = {
@@ -215,11 +216,12 @@ window.onload = function() {
             sunDirection : sunDirection,
             realtime : realtime,
             sunColor : sunColor,
-            drivePos : drivePos
+            drivePos : drivePos,
+            sunDirSlope: sunDirSlope
         }
 
         // initialize all of the objects that haven't yet been initialized (that way objects can be added at any point)
-        var shadow = new Shadow();
+
         if(!shadow.shadowReady){
           var textureSize = 512;
           shadow.initShadow(drawingState,textureSize);
@@ -249,9 +251,10 @@ window.onload = function() {
             shadow.shadow(drawingState,grobjects);
 
             grobjects.forEach(function (obj) {
+                if(obj.name!="test")
                 if(obj.draw) {
-                  obj.draw(drawingState);
-                  //obj.draw(drawingState,shadow);
+                  //obj.draw(drawingState);
+                  obj.draw(drawingState,shadow);
                 }
             });
 
