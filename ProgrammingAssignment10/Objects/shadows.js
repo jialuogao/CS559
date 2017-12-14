@@ -5,7 +5,7 @@ Shadow = function Shadow(){
   this.shadowMapGenProgram = undefined;
   this.shadowMapFramebuffer = undefined;
   this.shadowMapRenderbuffer = undefined;
-  this.shadowMap = undefined;
+  this.shadowMapCube = undefined;
   this.lightPosition = undefined;
   this.textureSize = undefined;
   this.shadowReady = false;
@@ -15,15 +15,21 @@ Shadow.prototype.initShadow = function(drawingState,textureSize){
   this.textureSize = 512||textureSize;
   this.lightPosition = twgl.v3.mulScalar(drawingState.sunDirection,rangeFar*3.0);
 
-  this.shadowMap = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, this.shadowMap);
-
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.textureSize, this.textureSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-
+  this.shadowMapCube = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.shadowMapCube);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+	for (var i = 0; i < 6; i++) {
+		gl.texImage2D(
+			gl.TEXTURE_CUBE_MAP_POSITIVE_X + i,
+			0, gl.RGBA,
+			this.textureSize, this.textureSize,
+			0, gl.RGBA,
+			gl.UNSIGNED_BYTE, null
+		);
+	}
   this.shadowMapFramebuffer = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowMapFramebuffer);
   this.shadowMapRenderbuffer = gl.createRenderbuffer();
@@ -43,6 +49,7 @@ Shadow.prototype.shadow = function(drawingState,objects){
     this.shadowMapGenProgram = twgl.createProgramInfo(gl, ["shadowMapGen-vs", "shadowMapGen-fs"]);
   }
   gl.useProgram(this.shadowMapGenProgram.program);
+  gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.shadowMapCube);
   gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowMapFramebuffer);
   gl.bindRenderbuffer(gl.RENDERBUFFER, this.shadowMapRenderbuffer);
   //gl.viewport(0,0, this.textureSize, this.textureSize);
@@ -60,13 +67,13 @@ Shadow.prototype.shadow = function(drawingState,objects){
     proj:Tprojection,
     view:view
   });
-  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,this.shadowMap,0);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,this.shadowMapCube,0);
   gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,this.shadowMapRenderbuffer);
   gl.clearColor(1,1,1,1);
   gl.disable(gl.DEPTH_TEST);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   // draw
-  gl.bindTexture(gl.TEXTURE_2D,this.shadowMap);
+  gl.bindTexture(gl.TEXTURE_2D,this.shadowMapCube);
   var programInfo = this.shadowMapGenProgram;
   objects.forEach(function(obj){
     if(obj.buffers)
