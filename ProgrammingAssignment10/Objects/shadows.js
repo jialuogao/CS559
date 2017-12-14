@@ -45,7 +45,7 @@ Shadow.prototype.shadow = function(drawingState,objects){
   gl.useProgram(this.shadowMapGenProgram.program);
   gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowMapFramebuffer);
   gl.bindRenderbuffer(gl.RENDERBUFFER, this.shadowMapRenderbuffer);
-  //gl.viewport(0,0, this.textureSize, this.textureSize);
+  gl.viewport(0,0, this.textureSize, this.textureSize);
 
   var eye = this.lightPosition;
   var target = [0,0,0];
@@ -92,7 +92,7 @@ Shadow.prototype.shadow = function(drawingState,objects){
       }
     }
   });
-  //gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+  gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	gl.bindRenderbuffer(gl.RENDERBUFFER, null);

@@ -122,7 +122,7 @@ var rNegZ = twgl.m4.rotationX(-Math.PI/2);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   };
-  Watercube.prototype.draw = function(drawingState) {
+  Watercube.prototype.draw = function(drawingState,shadow) {
     var gl = drawingState.gl;
     gl.useProgram(shaderProgram.program);
     twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers[0]);
@@ -139,6 +139,21 @@ var rNegZ = twgl.m4.rotationX(-Math.PI/2);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, normalMap);
     gl.uniform1i(shaderProgram.program.uNormMap,1);
+    var eye = shadow.lightPosition;
+    var target = [0,0,0];
+    var up = drawingState.sunDirSlope;
+    var view = m4.inverse(m4.lookAt(eye,target,up));
+    var Tprojection=m4.ortho(-50, 50, -50, 50, shadow.shadowRangeNearFar[0], shadow.shadowRangeNearFar[1]);
+    var Tmvp = m4.multiply(view,Tprojection);
+    twgl.setUniforms(shaderProgram,{
+      shadowRangeNearFar:shadow.shadowRangeNearFar,lightPosition:shadow.lightPosition,
+      shadowMVP : Tmvp
+    });
+
+    shaderProgram.program.shadowMap = gl.getUniformLocation(shaderProgram.program, "shadowMap");
+    gl.activeTexture(gl.TEXTURE7);
+    gl.bindTexture(gl.TEXTURE_2D, shadow.shadowMap);
+    gl.uniform1i(shaderProgram.program.shadowMap,7);
 
     twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers[0]);
   };

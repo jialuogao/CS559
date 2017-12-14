@@ -74,6 +74,7 @@ window.onload = function() {
     // a selector for which object should be examined
     var toExamine = document.createElement("select");
     grobjects.forEach(function(obj) {
+      if(obj.name!="test" && obj.name!="Ground Plane")
            toExamine.innerHTML +=  "<option>" + obj.name + "</option>";
         });
     controls.appendChild(toExamine);
@@ -244,7 +245,7 @@ window.onload = function() {
             var shift = twgl.m4.translation([-ctr[0],-ctr[1],-ctr[2]]);
             twgl.m4.multiply(shift,drawingState.view,drawingState.view);
 
-            if(examined.draw) examined.draw(drawingState);
+            if(examined.draw) examined.draw(drawingState,shadow);
             if(examined.drawAfter) examined.drawAfter(drawingState);
         } else {
 
@@ -253,7 +254,6 @@ window.onload = function() {
             grobjects.forEach(function (obj) {
                 if(obj.name!="test")
                 if(obj.draw) {
-                  //obj.draw(drawingState);
                   obj.draw(drawingState,shadow);
                 }
             });

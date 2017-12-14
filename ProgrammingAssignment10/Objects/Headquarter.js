@@ -178,16 +178,25 @@ var Headquarter = undefined;
 
     gl.useProgram(shaderProgram.program);
     twgl.setBuffersAndAttributes(gl,shaderProgram,this.buffers[0]);
+
+    var eye = shadow.lightPosition;
+    var target = [0,0,0];
+    var up = drawingState.sunDirSlope;
+    var view = m4.inverse(m4.lookAt(eye,target,up));
+    var Tprojection=m4.ortho(-50, 50, -50, 50, shadow.shadowRangeNearFar[0], shadow.shadowRangeNearFar[1]);
+    var Tmvp = m4.multiply(view,Tprojection);
+
     twgl.setUniforms(shaderProgram,{
       view:drawingState.view, proj:drawingState.proj, lightdir:drawingState.sunDirection,
       lightColor:drawingState.sunColor, model: this.model, objColor: this.color,
-      shadowRangeNearFar:shadow.shadowRangeNearFar,lightPosition:shadow.lightPosition
+      shadowRangeNearFar:shadow.shadowRangeNearFar,lightPosition:shadow.lightPosition,
+      shadowMVP : Tmvp
     });
 
-    shaderProgram.program.shadowMap = gl.getUniformLocation(shaderProgram.program, "shadowMap");
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, shadow.shadowMap);
-    gl.uniform1i(shaderProgram.program.shadowMap,0);
+    // shaderProgram.program.shadowMap = gl.getUniformLocation(shaderProgram.program, "shadowMap");
+    // gl.activeTexture(gl.TEXTURE7);
+    // gl.bindTexture(gl.TEXTURE_2D, shadow.shadowMap);
+    // gl.uniform1i(shaderProgram.program.shadowMap,7);
 
     twgl.drawBufferInfo(gl, gl.TRIANGLES, this.buffers[0]);
   };
@@ -197,4 +206,4 @@ var Headquarter = undefined;
 })();
 
 grobjects.push(new Headquarter([-40,0.02,-25],8.0));
-//grobjects.push(new Headquarter([-40,0.02,10],8.0));
+// grobjects.push(new Headquarter([-40,0.02,10],8.0));

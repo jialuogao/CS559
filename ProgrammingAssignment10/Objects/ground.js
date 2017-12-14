@@ -88,7 +88,7 @@ var groundPlaneSize = groundPlaneSize || 50;
             var arrays = {
               vPosition : { numComponents: 3, data: pos },
               vNormal : { numComponents: 3, data: norms },
-              vTexCorrd: { numComponents: 2, data: texc2},
+              vTexCorrd: { numComponents: 2, data: texc},
             };
             this.buffers.push(twgl.createBufferInfoFromArrays(gl,arrays));
             gl.useProgram(shaderProgram.program);
