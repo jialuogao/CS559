@@ -12,7 +12,7 @@ Shadow = function Shadow(){
 }
 Shadow.prototype.initShadow = function(drawingState,textureSize){
   var gl = drawingState.gl;
-  this.textureSize = 512||textureSize;
+  this.textureSize = 2048||textureSize;
   this.lightPosition = twgl.v3.mulScalar(drawingState.sunDirection,rangeFar*3.0);
 
   this.shadowMap = gl.createTexture();
