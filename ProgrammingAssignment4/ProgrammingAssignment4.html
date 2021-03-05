@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PA4</title>
+    <script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
+  </head>
+  <body>
+    <div style="float:left; width:70%"><canvas id="canvas" height="900" width="1000">
+    </canvas></div>
+    <div style="float:left; width:15%">
+      <div><h3>Rotate By Z Axis</h3><input id="slider1" type="range" min="-50" max="50" /></div>
+      <div><h3>Vision Level</h3><input id="slider3" class="vertical-range" type="range" min="-100" max="100" /></div>
+      <div><h3>Numbers of objects</h3><input id="slider5" type="range" min="1" max="4"/></div>
+      <div><button id="button2" onclick="toggleFS();">Toggle Fill/Stroke</button></div>
+    </div>
+    <div style="float:left; width:15%">
+        <div><h3>Triangle Density</h3><input id="slider4" type="range" min="10" max="40" /></div>
+        <div><button id="button" onclick="toggle();">Toggle Ortho/Persp</button></div>
+        <div><h3>Motion speed</h3><input id="slider2" type="range" min="0.5" max="4" step="0.05" /></div>
+        <div><h3>Turn off motion 1</h3><input id="bool1" type="checkbox"/></div>
+        <div><h3>Turn off motion 2</h3><input id="bool2" type="checkbox"/></div>
+        <div><h3>Hide Axis</h3><input id="bool3" type="checkbox"/></div>
+    </div>
+  </body>
+</html>
+
+<style>
+  /*Got the following style code from https://codepen.io/ATC-test/pen/myPNqW*/
+  .vertical-range {
+    -webkit-appearance: slider-vertical;
+  }
+</style>
+
+<script type="text/javascript">
+  "use strict";
+  var canvas=document.getElementById('canvas');
+  var context=canvas.getContext('2d');
+  var m4=twgl.m4;
+
+  var slider1 = document.getElementById('slider1');     //value for rotation around Z axis
+  slider1.value = -10;
+  var slider2 = document.getElementById('slider2');     //speed
+  slider2.value = 2;
+  var slider3 = document.getElementById('slider3');     //vertical vision level
+  slider3.value = 100;
+  var slider4 = document.getElementById('slider4');     //skeleton density
+  slider4.value = 20;
+  var slider5 = document.getElementById('slider5');     //number of object
+  slider5.value = 3;
+  var bool1 = document.getElementById('bool1');         //turn off motion 1
+  var bool2 = document.getElementById('bool2');         //turn off motion 2
+  var bool3 = document.getElementById('bool3');         //hide axes
+  var persp = true;                                     //boolean for toggle between ortho/persp
+  var fill = true;                                      //boolean for toggle between fill/stroke
+  var axis1 = [1,0,0];                                  // x axis
+  var axis2 = [0,1,0];                                  // y axis
+  var axis3 = [0,0,1];                                  // z axis
+  var ag = 0;                                           //angle for animation
+  var triangles = [];
+  function moveToTx(x,y,z,Tx){
+    var location = [x,y,z];
+    var locationTx = m4.transformPoint(Tx,location);
+    context.moveTo(locationTx[0],-locationTx[1]);
+  }
+  function lineToTx(x,y,z,Tx){
+    var location = [x,y,z];
+    var locationTx = m4.transformPoint(Tx,location);
+    context.lineTo(locationTx[0],-locationTx[1]);
+  }
+  function drawTriangle(tri){
+    context.beginPath();
+    context.fillStyle=tri[3];
+    moveToTx(tri[0][0],tri[0][1],tri[0][2],tri[4]);
+    lineToTx(tri[1][0],tri[1][1],tri[1][2],tri[4]);
+    lineToTx(tri[2][0],tri[2][1],tri[2][2],tri[4]);
+    context.closePath();
+    if(fill){
+      context.fill();
+    }
+    else{
+      context.stroke();
+    }
+  }
+  function addTri(tri){
+    triangles.push(tri);
+  }
+  // draw horizontal skeleton (horizontal circle)
+  function setUpTriangles(r1,r2,ag1,ag2,Tx,angleD,Tmodel){
+    var pSet = [];
+    //moveToTx(r1-Math.cos(ag1)*r2,0,r2*Math.sin(ag1),Tx);
+    var tempTri = [];
+    for(var j=angleD;j<2.001*Math.PI;j+=angleD){
+      var x = (r1-Math.cos(ag1)*r2)*Math.cos(j+ag2);
+      var y = (r1-Math.cos(ag1)*r2)*Math.sin(j+ag2);
+      var z = r2*Math.sin(ag1);
+      pSet.push(m4.transformPoint(Tmodel,[x,y,z]));
+    }
+    return pSet;
+  }
+  //calculating all the points
+  function drawShape(r1,r2,ag,Tx,n,turnVert,turnHori,count,Tmodel){
+    count--;
+    ag =- ag;
+    var angleD = Math.PI*2/n;   // full circle / density
+    var pSets = [];
+    // calculate vertex
+    for(var i = 0 ; i <= n ; i ++){
+      var ag1, ag2;
+      if(turnVert){
+        ag1 = ag;
+      }
+      else {
+        ag1 = 0;
+      }
+      if(turnHori){
+        ag2 = ag;
+      }
+      else{
+        ag2 = 0;
+      }
+      pSets[i] = setUpTriangles(r1,r2,(ag1+i*angleD),ag2,Tx,angleD,Tmodel);
+    }
+    // setup triangles
+    for(var i = 0; i < pSets.length; i++){
+      var pSet1 = pSets[i];
+      var iPlus1 = i + 1;
+      if(iPlus1 >= pSets.length){
+        iPlus1 = 0;
+      }
+      var pSet2 = pSets[iPlus1];
+      for(var j=0; j < pSet1.length; j++){
+        var jPlus1 = j + 1;
+        if(jPlus1 >= pSet1.length){
+          jPlus1 = 0;
+        }
+        addTri([pSet1[j],pSet1[jPlus1],pSet2[j],"green",Tx]);
+        addTri([pSet2[j],pSet2[jPlus1],pSet1[jPlus1],"green",Tx]);
+      }
+    }
+    //draw smaller object by recursion
+    if(count>0){
+      var Tmodel = m4.multiply(m4.multiply(m4.axisRotation(axis2,Math.PI/2),m4.multiply(m4.scaling([0.3,0.3,0.3]),m4.translation([0,r1,0]))),Tmodel);
+      Tmodel = m4.multiply(m4.translation([(r1+r2)*Math.sin(ag*3)*2.25,(r1+r2)*Math.cos(ag*3)*2.25,0]),Tmodel);
+      drawShape(r1,r2,3*ag,Tx,n,turnVert,turnHori,count,Tmodel);
+    }
+  }
+  //draw x,y,z axes
+  function drawAxes(Tx){
+    moveToTx(0,0,0,Tx);
+    lineToTx(500,0,0,Tx);
+    context.stroke();
+    moveToTx(0,0,0,Tx);
+    lineToTx(0,500,0,Tx);
+    context.stroke();
+    moveToTx(0,0,0,Tx);
+    lineToTx(0,0,500,Tx);
+    context.stroke();
+  }
+  //draw picture
+  function draw() {
+    canvas.width = canvas.width;
+    triangles = [];
+    var n = document.getElementById("slider4").value;   //density
+    var angle1 = slider1.value*0.02*Math.PI;            //rotation angle
+    var level = (slider3.value-100)*0.005*Math.PI;      //vision level
+    var turnVert = !bool1.checked;                      //motion 1
+    var turnHori = !bool2.checked;                      //motion 2
+    var HideAxes = bool3.checked;                       //hide axis
+    var numberOO = slider5.value;                       //number of object
+
+    var eye = [800,800,800*Math.cos(level)];
+    var target = [0,0,0];
+    var up = [0,0,1];
+
+    var Tmodel = m4.axisRotation(axis3,angle1);
+    var Tcamera = m4.inverse(m4.lookAt(eye,target,up));
+    var Tprojection;
+    //toggle feature
+    if(persp){
+      Tprojection=m4.perspective(Math.PI/8,1,3,400);
+    }
+    else {
+      Tprojection=m4.ortho(-250,250,-200,300,-2,2);
+    }
+    var Tviewport = m4.multiply(m4.scaling([180,180,180]),m4.translation([500,-350,0]));
+    var Tmcpv = m4.multiply(Tmodel,m4.multiply(m4.multiply(Tcamera,Tprojection),Tviewport));
+    //hide axes
+    if(!HideAxes){
+      drawAxes(Tmcpv);
+    }
+    // calculate triangles
+    drawShape(200,100,ag,Tmcpv,n,turnVert,turnHori,numberOO,m4.identity());
+    var Tmc = m4.multiply(Tmodel,Tcamera);
+    //changing color
+    for(var i=0;i<triangles.length;i++){
+      var cam=m4.transformPoint(Tmc,triangles[i][1]);
+      triangles[i][3]="rgb(0,"+Math.floor(((-cam[2]-850)/730)*255)+",0)";
+    }
+    //painter's algo
+    triangles.sort(function(a, b){
+      a = parseInt(a[3].substring(6,10));
+      b = parseInt(b[3].substring(6,10));
+      return b-a;
+    });
+    //draw triangles
+    for(var i=0; i<triangles.length; i++){
+      drawTriangle(triangles[i],Tmcpv);
+    }
+    update();
+    window.requestAnimationFrame(draw);
+  }
+  //update for animation
+  function update(){
+    ag = (ag + Math.PI/320*slider2.value) % (Math.PI*2);  //change in angle for animation (scale with speed)
+  }
+  function toggle(){
+    persp = !persp;
+  }
+  function toggleFS(){
+    fill = !fill;
+  }
+  window.onload = draw;
+</script>
